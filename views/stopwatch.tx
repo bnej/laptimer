@@ -1,6 +1,45 @@
 : cascade layouts::main
 : around body {
 
-Hello <: $club :>!
+<div class="row">
+  <div class="col-md-3">
+  </div>
+  <div class="col-md-6">
+    <h1>Hello <: $club :>!</h1>
+  </div>
+  <div class="col-md-3">
+  </div>
+</div>
 
+<div class="row">
+  <div class="col-md-3">
+  </div>
+  <div class="col-md-6" id="timer-current">
+    
+  </div>
+  <div class="col-md-3">
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-6" id="start-stop">
+    Start/Stop
+  </div>
+  <div class="col-md-6" id="mark">
+    Mark
+  </div>
+</div>
+
+
+<script>
+  var start = Date.now();
+
+  function mark() {
+    var current = Date.now();
+    var delta = current - start;
+    setTimeout(mark, 100);
+    $('#timer-current').text( ms_format( delta ) );
+  }
+  mark();
+</script>
 : }
