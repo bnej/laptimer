@@ -4,7 +4,8 @@
 <div class="container-fluid topbar">
   <div class="row">
     <div class="col-xl-12">
-      <h1>Hello <: $club :>!</h1>
+      <h1>Hello <: $event_info.club_name :>!</h1>
+      <h2>Timing: <: $event_info.event_name :></h2>
     </div>
   </div>
 </div>
@@ -21,13 +22,13 @@
   </div>
   
   <div class="row">
-    <div class="col-md-6">
+    <div class="col-6">
       <button type="button"
 	      class="btn btn-success btn-lg btn-block"
 	      id="start-stop"
 	      onclick="start_stop($('#start-stop'));">Start</button>
     </div>
-    <div class="col-md-6">
+    <div class="col-6">
       <button type="button"
 	      class="btn btn-primary btn-lg btn-block"
 	      id="mark-time"

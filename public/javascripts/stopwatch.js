@@ -48,7 +48,7 @@ function mark() {
 	time_fmt: delta_fmt,
 	sync: false,
     });
-    $('#mark-table > tbody').prepend('<tr><th scope="row">'+num+'</th><td>'+delta_fmt+'</tr>');
+    $('#mark-table > tbody').prepend('<tr class="table-warning"><th scope="row">'+num+'</th><td>'+delta_fmt+'</tr>');
     num ++;
 }
 update_time();

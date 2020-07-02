@@ -11,14 +11,16 @@ get '/' => sub {
     template 'index';
 };
 
-get '/club/:club/stopwatch' => sub {
+get '/club/:club/:event/stopwatch' => sub {
     my $club = params->{club};
+    my $event = params->{event};
+    
     my $sth = database->prepare(
-	"select * from club where clubid = ?"
+	"select * from club join event using (club_id) where club_id = ? and event_id = ?"
 	);
-    $sth->execute($club);
+    $sth->execute($club, $event);
     my $cr = $sth->fetchrow_hashref();
-    template 'stopwatch', { club => $cr->{clubname} };
+    template 'stopwatch', { event_info => $cr };
 };
 
 true;
