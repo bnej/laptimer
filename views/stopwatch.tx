@@ -1,73 +1,59 @@
 : cascade layouts::main
 : around body {
 
-<div class="row">
-  <div class="col-md-3">
-  </div>
-  <div class="col-md-6">
-    <h1>Hello <: $club :>!</h1>
-  </div>
-  <div class="col-md-3">
+<div class="container-fluid topbar">
+  <div class="row">
+    <div class="col-xl-12">
+      <h1>Hello <: $club :>!</h1>
+    </div>
   </div>
 </div>
 
-<div class="row">
-  <div class="col-md-3">
+<div class="container">
+  <div class="row">
+    <div class="col-md-3">
+    </div>
+    <div class="col-md-6" id="timer-current">
+      
+    </div>
+    <div class="col-md-3">
+    </div>
   </div>
-  <div class="col-md-6" id="timer-current">
-    
+  
+  <div class="row">
+    <div class="col-md-6">
+      <button type="button"
+	      class="btn btn-success btn-lg btn-block"
+	      id="start-stop"
+	      onclick="start_stop($('#start-stop'));">Start</button>
+    </div>
+    <div class="col-md-6">
+      <button type="button"
+	      class="btn btn-primary btn-lg btn-block"
+	      id="mark-time"
+	      onclick="mark();">Mark</button>
+    </div>
   </div>
-  <div class="col-md-3">
+  
+  <div class="row">
+    <div class="col-12">
+      <table class="table" id="mark-table">
+	<thead class="thead-light">
+	  <tr>
+	    <th scope="col" style="width: 40px;">#</th>
+	    <th scope="col">Mark</th>
+	  </tr>
+	</thead>
+	<tbody>
+	  <tr></tr>
+	</tbody>
+      </table>
+    </div>
   </div>
+  
 </div>
-
-<div class="row">
-  <div class="col-md-6" id="start-stop">
-    <button type="button" class="btn btn-success btn-lg btn-block">Start</button>
-  </div>
-  <div class="col-md-6" id="mark">
-    <button type="button" class="btn btn-primary btn-lg btn-block" onclick="mark();">Mark</button>
-  </div>
-</div>
-
-<div class="row">
-  <div class="col-12">
-    <table class="table" id="mark-table">
-      <thead class="thead-light">
-	<tr>
-	  <th scope="col">#</th>
-	  <th scope="col">Mark</th>
-	</tr>
-      </thead>
-      <tbody>
-	<tr></tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
 
 <script>
-  var start = Date.now();
-  var num = 1;
-
-  function update_time() {
-    var current = Date.now();
-    var delta = current - start;
-    $('#timer-current').text( ms_format( delta ) );
-    setTimeout(update_time, 100);
-  }
-
-  function mark() {
-  var current = Date.now();
-  var delta = current - start;
-  var delta_fmt = ms_format( delta );
-  console.log(delta_fmt);
-  $('#mark-table > tbody').prepend('<tr><th scope="col">'+num+'</th><td>'+delta_fmt+'</tr>');
-  num ++;
-  }
-  update_time();
-
-  
+$('#timer-current').text( ms_format( 0, 0 ) );
 </script>
 : }

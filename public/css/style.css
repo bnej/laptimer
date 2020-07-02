@@ -3,11 +3,9 @@ body {
     
 }
 
-
-
 h1 {
 font-size: 28px;
-color: #000;
+text-align: center;
 }
 
 a  {color: #03c}
@@ -15,6 +13,11 @@ a:hover {
 background-color: #03c;
 color: white;
 text-decoration: none;
+}
+
+.topbar {
+    background-color: #f33;
+    color: #fff;
 }
 
 #timer-current {
