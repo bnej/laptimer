@@ -39,16 +39,34 @@ function update_time() {
 
 var timer_marks = [ ];
 
+function fix_marks( data ) {
+    data.each( function(v) {
+	$("row-mark-"+v.mark_number).removeClass("table-warning").addClass("tables-success");
+    });
+}
+
 function mark() {
     var current = Date.now();
     var delta = current - timer_start;
     var delta_fmt = ms_format( delta );
     timer_marks.push( {
-	time: delta,
-	time_fmt: delta_fmt,
+	mark_number: num,
+	mark: delta,
+	mark_fmt: delta_fmt,
 	sync: false,
     });
-    $('#mark-table > tbody').prepend('<tr class="table-warning"><th scope="row">'+num+'</th><td>'+delta_fmt+'</tr>');
+
+    $('#mark-table > tbody').prepend('<tr class="table-warning" id="row-mark-'+num+'"><th scope="row">'+num+'</th><td>'+delta_fmt+'</tr>');
+
+    $.ajax({
+	type: 'POST',
+	url: baseurl + "/timing",
+	data: JSON.stringify({ timing: timer_marks }),
+	contentType: "application/json",
+	success: fix_marks,
+	dataType: "json"
+    });
+    
     num ++;
 }
 update_time();

@@ -29,6 +29,8 @@ engines:
     module:
       - Text::Xslate::Bridge::TT2Like # to keep partial compatibility with Template Toolkit
 
+serializer: JSON
+
 plugins:
   Database:
     driver: 'Pg'

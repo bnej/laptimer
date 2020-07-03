@@ -55,6 +55,7 @@
 </div>
 
 <script>
+var baseurl = '<: $baseurl :>';
 $('#timer-current').text( ms_format( 0, 0 ) );
 </script>
 : }
