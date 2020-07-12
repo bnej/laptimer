@@ -19,3 +19,8 @@ text-decoration: none;
     text-align: center;
     font-size: 38px;
 }
+
+.riders .lap-counter {
+    float: right;
+    clear: right;
+}

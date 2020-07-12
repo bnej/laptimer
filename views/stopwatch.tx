@@ -1,4 +1,7 @@
 : cascade layouts::main
+: around js_head {
+<script src="<: $request.uri_base :>/javascripts/stopwatch.js"></script>
+: }
 : around body {
 
 <div class="container-fluid topbar">

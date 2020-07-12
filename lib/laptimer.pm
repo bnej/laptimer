@@ -76,4 +76,18 @@ get '/club/:club/:event/stopwatch' => sub {
 			    "baseurl" => "/club/$club/$event" };
 };
 
+get '/club/:club/:event/lap' => sub {
+    my $club = params->{club};
+    my $event = params->{event};
+    
+    my $sth = database->prepare(
+	"select * from club join event using (club_id) where club_id = ? and event_id = ?"
+	);
+    $sth->execute($club, $event);
+    my $cr = $sth->fetchrow_hashref();
+    template 'lap', { event_info => $cr,
+		      "baseurl" => "/club/$club/$event" };
+
+};
+
 true;
