@@ -12,6 +12,26 @@ get '/' => sub {
     template 'index';
 };
 
+get '/club/:club/:event/timing' => sub {
+    my $club = params->{club};
+    my $event = params->{event};
+
+    my $sth = database->prepare(
+	"select * from time_mark where event_id = ? order by timing_number"
+	);
+    $sth->execute($event);
+    my @r = ( );
+    while( my $r = $sth->fetchrow_hashref ) {
+	push @r, {
+	    mark_number => $r->{timing_number},
+	    mark => $r->{timing_mark},
+	    sync => 1
+	};
+    }
+
+    return \@r;
+};
+
 post '/club/:club/:event/timing' => sub {
     my $club = params->{club};
     my $event = params->{event};
@@ -23,7 +43,6 @@ post '/club/:club/:event/timing' => sub {
 
     my $r = [ ];
     foreach my $time (@$timing) {
-	my $ok = 0;
 	my $ok =
 	    $sth->execute( $event, $time->{mark_number}, $time->{mark} );
 

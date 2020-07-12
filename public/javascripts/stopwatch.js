@@ -63,7 +63,7 @@ function mark() {
 	mark: delta,
 	mark_fmt: delta_fmt,
 	sync: false,
-    }
+    };
     timer_marks[ num ] = mark;
     to_sync.push( mark );
 
@@ -86,6 +86,29 @@ function add_mark( timer_marks ) {
     });
 }
 
+function load_marks( ) {
+    $.ajax({
+	type: 'GET',
+	url: baseurl + "/timing",
+	success: load_marks_update,
+	dataType: "json"
+    });
+}
+
+function load_marks_update( data ) {
+    data.forEach( function(v) {
+	num = v.mark_number + 1;
+	var mark = {
+	    mark_number: v.mark_number,
+	    mark: v.mark,
+	    mark_fmt: ms_format(v.mark),
+	    sync: true,
+	};
+	timer_marks[ v.mark_number ] = mark;
+
+	$('#mark-table > tbody').prepend('<tr class="table-success" id="row-mark-'+v.mark_number+'"><th class="time-number" scope="row">'+v.mark_number+'</th><td class="time-mark">'+mark.mark_fmt+'</tr>');
+    });
+}
 
 function zero_pad( n, width ) {
     var str = n.toString();
