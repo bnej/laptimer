@@ -38,26 +38,44 @@ function update_time() {
 }
 
 var timer_marks = [ ];
+var to_sync = [ ];
 
 function fix_marks( data ) {
-    data.each( function(v) {
-	$("row-mark-"+v.mark_number).removeClass("table-warning").addClass("tables-success");
+    data.forEach( function(v) {
+	var elts = $("#row-mark-"+v.mark_number);
+	if( v.sync == 0 ) {
+	    elts.removeClass("table-warning").addClass("table-info");
+	    elts.find(".time-mark").text(ms_format(v.mark));
+	} else {
+	    elts.removeClass("table-warning").addClass("table-success");
+	}
+	timer_marks[v.mark_number].sync = true;
     });
+    to_sync = to_sync.filter( function( value, index, arr ) { value.sync } );
 }
 
 function mark() {
     var current = Date.now();
     var delta = current - timer_start;
     var delta_fmt = ms_format( delta );
-    timer_marks.push( {
+    var mark = {
 	mark_number: num,
 	mark: delta,
 	mark_fmt: delta_fmt,
 	sync: false,
-    });
+    }
+    timer_marks[ num ] = mark;
+    to_sync.push( mark );
 
-    $('#mark-table > tbody').prepend('<tr class="table-warning" id="row-mark-'+num+'"><th scope="row">'+num+'</th><td>'+delta_fmt+'</tr>');
+    $('#mark-table > tbody').prepend('<tr class="table-warning" id="row-mark-'+num+'"><th class="time-number" scope="row">'+num+'</th><td class="time-mark">'+delta_fmt+'</tr>');
 
+    add_mark( to_sync );
+    
+    num ++;
+}
+update_time();
+
+function add_mark( timer_marks ) {
     $.ajax({
 	type: 'POST',
 	url: baseurl + "/timing",
@@ -66,10 +84,7 @@ function mark() {
 	success: fix_marks,
 	dataType: "json"
     });
-    
-    num ++;
 }
-update_time();
 
 
 function zero_pad( n, width ) {

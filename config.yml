@@ -38,6 +38,11 @@ plugins:
     host: 'localhost'
     username: 'benl'
     password: 'flt1'
+    dbi_params:
+        PrintError: 0
+        RaiseError: 0
+
+warnings: false
 
 # template: "template_toolkit"
 # engines:
