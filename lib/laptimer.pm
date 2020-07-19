@@ -10,9 +10,51 @@ use POSIX qw(ceil floor);
 our $VERSION = '0.1';
 
 get '/' => sub {
-    template 'index';
+    my $sth = database->prepare(
+	"select * from club order by club_name"
+	);
+    $sth->execute;
+
+    my @clubs;
+    while( my $r = $sth->fetchrow_hashref ) {
+	$r->{url} = "/club/".$r->{club_id};
+	push @clubs, $r;
+    }
+    
+    template 'index', {
+        "clubs" => \@clubs,
+    };
 };
 
+get '/club/:club' => sub {
+    my $club = params->{club};
+    my $sth = database->prepare(
+	"select * from club where club_id = $club"
+	);
+    $sth->execute( $club );
+    my $cr = $sth->fetchrow_hashref;
+
+    template 'list_events', {
+	club => $cr,
+	cluburl => "/club/$club"
+    };
+};
+
+get '/club/:club/events' => sub {
+    my $club = params->{club};
+    my $sth = database->prepare(
+	"select * from event where club_id = ? order by event_id"
+	) or die database->errstr;
+    $sth->execute($club) or die $sth->errstr;
+
+    my @r = ( );
+    while( my $r = $sth->fetchrow_hashref ) {
+	push @r, $r;
+    }
+
+    return \@r;
+};
+	
 get '/club/:club/:event/timing' => sub {
     my $club = params->{club};
     my $event = params->{event};

@@ -1,0 +1,30 @@
+: cascade layouts::main
+: around body {
+
+<div class="container-fluid topbar">
+  <div class="row">
+    <div class="col-xl-12">
+      <h2><: $club.club_name :></h1>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12">
+    <table class="table" id="event-table">
+      <thead class="thead-light">
+	<tr>
+	  <th scope="col">Event</th>
+	  <th scope="col">Start Lap</th>
+	  <th scope="col">Laps</th>
+	  <th scope="col">Active</th>
+	  <th scope="col">Links</th>
+	</tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+: }
