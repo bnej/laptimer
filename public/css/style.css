@@ -24,3 +24,15 @@ text-decoration: none;
     float: right;
     clear: right;
 }
+
+.break-above {
+    margin-top: 15px;
+}
+
+.break-above-sm {
+    margin-top: 5px;
+}
+
+.select-riders-form {
+    width: 100%;
+}

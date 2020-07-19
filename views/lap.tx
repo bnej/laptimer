@@ -1,5 +1,6 @@
 : cascade layouts::main
 : around js_head {
+<script src="<: $request.uri_base :>/javascripts/lap.js"></script>
 : }
 
 : around body {
@@ -35,9 +36,29 @@
       </ul>
     </div>
   </div>
+
+  <div class="row break-above">
+    <div class="col-12">
+      <button type="button"
+	      class="btn btn-primary btn-lg btn-block"
+	      id="show-athletes"
+	      data-toggle="collapse"
+	      data-target="#select-riders">
+	Select Atlhetes</button>
+    </div>
+  </div>
+
+  <div class="row break-above-sm">
+    <form name="select-riders" class="select-riders-form">
+    <div class="col-12 collapse" id="select-riders">
+    </div>
+  </div>
   
 </div>
 
 <script>
+  var baseurl = '<: $baseurl :>';
+  var cluburl = '<: $cluburl :>';
+  load_athletes();
 </script>
 : }

@@ -32,6 +32,26 @@ get '/club/:club/:event/timing' => sub {
     return \@r;
 };
 
+get '/club/:club/athletes' => sub {
+    my $club = params->{club};
+
+    my $sth = database->prepare(
+	"select * from athlete where club_id = ?"
+	);
+    $sth->execute($club);
+
+    my @r = ( );
+    while( my $r = $sth->fetchrow_hashref ) {
+	push @r, {
+	    id => $r->{athlete_id},
+	    name => $r->{athlete_name},
+	    alias => $r->{athlete_alias} || $r->{athlete_name}
+	}
+    }
+    
+    return \@r;
+};
+
 post '/club/:club/:event/timing' => sub {
     my $club = params->{club};
     my $event = params->{event};
@@ -85,9 +105,11 @@ get '/club/:club/:event/lap' => sub {
 	);
     $sth->execute($club, $event);
     my $cr = $sth->fetchrow_hashref();
-    template 'lap', { event_info => $cr,
-		      "baseurl" => "/club/$club/$event" };
-
+    template 'lap', {
+	"event_info" => $cr,
+	"baseurl" => "/club/$club/$event",
+	"cluburl" => "/club/$club",
+    };
 };
 
 true;
