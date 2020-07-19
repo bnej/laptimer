@@ -33,8 +33,8 @@ get '/club/:club/:event/timing' => sub {
     return \@r;
 };
 
-get '/club/:club/athletes' => sub {
-    my $club = params->{club};
+sub load_athletes {
+    my $club = shift;
 
     my $sth = database->prepare(
 	"select * from athlete where club_id = ?"
@@ -51,6 +51,24 @@ get '/club/:club/athletes' => sub {
     }
     
     return \@r;
+}
+
+get '/club/:club/athletes' => sub {
+    my $club = params->{club};
+
+    return load_athletes($club);
+};
+
+post '/club/:club/athletes' => sub {
+    my $club = params->{club};
+    my $name = params->{name};
+
+    my $sth = database->prepare(
+	"insert into athlete (club_id, athlete_name) values (?,?)"
+	);
+    $sth->execute( $club, $name );
+
+    return load_athletes( $club );
 };
 
 post '/club/:club/:event/timing' => sub {

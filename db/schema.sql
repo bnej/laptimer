@@ -9,6 +9,9 @@ create table event (
     event_id     serial not null,
     event_name   varchar(60) not null,
     event_text   text,
+    start_lap    integer,
+    total_laps   integer,
+    event_active boolean default true,
     primary key (event_id)
 );
 

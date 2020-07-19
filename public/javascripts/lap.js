@@ -28,6 +28,10 @@ function load_athletes( ) {
 }
 
 function load_athletes_update( data ) {
+    var sr = $('#select-riders');
+    sr.html(""); /* clear before populating */
+    $("#new-rider-form input").val("");
+    
     data.forEach( function(v) {
 	var athlete = {
 	    id: v.id,
@@ -37,7 +41,7 @@ function load_athletes_update( data ) {
 	athletes[ v.id ] = athlete;
 	lap[ v.id ] = 0;
 
-	$('#select-riders').append(
+	sr.append(
 	    '<div class="input-group mb-1" id="select-athlete-'+v.id+'">'+
 		'<div class="input-group-prepend">'+
 		'<span class="input-group-text">'+v.name+'</span>'+
@@ -45,6 +49,28 @@ function load_athletes_update( data ) {
 		'<input name="race-no-'+v.id+'"type="text" class="form-control" placeholder="Race #">'+
 		'</div>'
 	);
+    });
+}
+
+function new_athlete( ) {
+    var formdata = $('#new-rider-form').serialize();
+    if($('#new-rider-name').val() == "") {
+	$('#new-rider-form').prepend(
+	    '<div class="alert alert-warning alert-dismissable fade show" role="alert">'+
+		"<span>You need to fill in a name</span>" +
+		'<button type="button" class="close" data-dismiss="alert" aria-label="Close">'+
+		'<span aria-hidden="true">&times;</span>'+
+		'</button>'+
+		'</div>'
+	);
+	return;
+    }
+    
+    $.ajax({
+	type: 'POST',
+	url: cluburl + "/athletes",
+	data: formdata,
+	success: load_athletes_update,
     });
 }
 
