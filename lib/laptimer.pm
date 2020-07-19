@@ -171,9 +171,7 @@ get '/club/:club/:event/results' => sub {
 	push @{$athletes{$id}{laps}}, $lap;
 	
 	my $event_laps = ++ $athletes{$id}{event_laps};
-	warning($event_laps);
 	if( $event_laps >= $cr->{total_laps} ) {
-	    warning("finished");
 	    $athletes{$id}{finished} = 1;
 	}
 	$athletes{$id}{total} += $lap;
@@ -186,7 +184,6 @@ get '/club/:club/:event/results' => sub {
     
     foreach my $id (keys %athletes) {
 	$sth_a->execute( $id );
-	warning $id;
 	my $r = $sth_a->fetchrow_hashref;
 
 	$athletes{$id}{name} = $r->{athlete_name};
