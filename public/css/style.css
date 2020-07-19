@@ -20,7 +20,11 @@ text-decoration: none;
     font-size: 38px;
 }
 
-.riders .lap-counter {
+.rider .rider-marker {
+    font-size: 120%;
+}
+
+.rider .lap-counter {
     float: right;
     clear: right;
 }

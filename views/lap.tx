@@ -17,22 +17,17 @@
 <div class="container">
   <div class="row">
     <div class="col-6" >
-      <h1><span id="lap-count-back" class="badge badge-warning">1</span></h1>
+      <h1><span id="lap-count-back" class="badge badge-warning">0</span> Back</h1>
     </div>
     <div class="col-6" style="text-align: right">
-      <h1><span id="lap-count-front" class="badge badge-success">2</span></h1>
+      <h1>Front <span id="lap-count-front" class="badge badge-success">0</span></h1>
     </div>
   </div>
   
   
   <div class="row">
     <div class="col-12">
-      <ul class="list-group">
-	<li class="list-group-item riders">
-	  <span class="badge rider-marker badge-primary">A</span>
-	  <span class="badge badge-light">Example Person</span>
-	  <span class="badge badge-pill lap-counter badge-info">2</span>
-	</li>
+      <ul class="list-group" id="rider-list">
       </ul>
     </div>
   </div>
@@ -43,15 +38,25 @@
 	      class="btn btn-primary btn-lg btn-block"
 	      id="show-athletes"
 	      data-toggle="collapse"
-	      data-target="#select-riders">
+	      data-target="#select-riders-wrapper">
 	Select Atlhetes</button>
     </div>
   </div>
 
   <div class="row break-above-sm">
-    <form name="select-riders" class="select-riders-form">
-    <div class="col-12 collapse" id="select-riders">
-    </div>
+    <form name="select-riders" class="select-riders-form" id="select-riders-form">
+      <div class="col-12 collapse" id="select-riders-wrapper">
+	<div id="select-riders">
+	</div>
+	<button type="button"
+		class="btn btn-success btn-lg btn-block"
+		id="select-save-athletes-button"
+		onclick="select_save_athletes()">
+	  Save Selection</button>
+      </div>
+    </form>
+  </div>
+
   </div>
   
 </div>
