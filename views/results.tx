@@ -1,0 +1,44 @@
+: cascade layouts::main
+: around body {
+
+<div class="container-fluid topbar">
+  <div class="row">
+    <div class="col-xl-12">
+      <h2><: $event_info.club_name :></h1>
+      <h2>Results: <: $event_info.event_name :></h2>
+    </div>
+  </div>
+</div>
+
+  <div class="row">
+    <div class="col-12">
+      <table class="table" id="mark-table">
+	<thead class="thead-light">
+	  <tr>
+	    <th scope="col" style="width: 40px;">Place</th>
+	    <th scope="col">Rider</th>
+	    <th scope="col">Laps</th>
+	    <th scope="col">Best Lap</th>
+	    <th scope="col">Total Time</th>
+	  </tr>
+	</thead>
+	<tbody>
+	  : for $results -> $item {
+	  <tr>
+	    <td><: $item.place :></td>
+	    <td><: $item.name :></td>
+	    <td><: $item.event_laps :></td>
+	    <td><: $item.fastest :></td>
+	    <td><: $item.total :></td>
+	  </tr>
+	  : }
+	  : else {
+          <tr><td colspan="5">No event results.</td></tr>
+	  : }
+	</tbody>
+      </table>
+    </div>
+  </div>
+
+
+: }
