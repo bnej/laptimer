@@ -2,10 +2,10 @@ var athletes = [ ];
 var a_select = [ ];
 
 var marks = [ ];
-var mark_sync = [ ];
+var to_sync = [ ];
 var lap = [ ];
 
-var mark_number = 0;
+var mark_number = 1;
 var front_lap = 0;
 var tail_lap = 0;
 
@@ -38,7 +38,6 @@ function load_athletes_update( data ) {
 	lap[ v.id ] = 0;
 
 	$('#select-riders').append(
-	    //'<li class="list-group-item riders" id="row-athlete-'+v.id+'"><div class="form-check"><input class="form-check-input" type="checkbox" name="check-athlete" id="check-athlete-'+v.id+'" value="'+v.id+'"><label class="form-check-label for="check-athlete-'+v.id+'>'+v.name+'</label></div></li>'
 	    '<div class="input-group mb-1" id="select-athlete-'+v.id+'">'+
 		'<div class="input-group-prepend">'+
 		'<span class="input-group-text">'+v.name+'</span>'+
@@ -84,9 +83,9 @@ function select_save_athletes( ) {
 		'<span class="badge badge-light">'+
 		a.name+
 		'</span>'+
-		'<span class="badge lap-time"></span>' +
-		'<span class="badge total-time"></span>' +
-		'<span class="badge badge-pill lap-counter badge-info">0</span>'+
+		'<span class="badge badge-info lap-time"></span>' +
+		'<span class="badge badge-light total-time"></span>' +
+		'<span class="badge badge-pill lap-counter badge-success">0</span>'+
 		'</li>'
 	);
 	$('#rider-'+a.id).on( "click", athlete_lap );
@@ -103,7 +102,12 @@ function athlete_lap( ) {
 	"sync":false
     };
     marks[mark_number] = place_mark;
-    mark_sync[mark_number] = place_mark;
+    to_sync.push( place_mark );
+    
+    mark_number ++;
+
+    sync_laps( to_sync );
+    
     lap[ id ] ++;
 
     if( lap[ id ] > front_lap ) front_lap = lap[ id ];
@@ -115,4 +119,40 @@ function athlete_lap( ) {
     $(this).detach()
     $(this).children(".lap-counter").text( lap[ id ] );
     $('#rider-list').append($(this));
+}
+
+function sync_laps( lap_marks ) {
+    $.ajax({
+	type: 'POST',
+	url: baseurl + "/lap_data",
+	data: JSON.stringify({ laps: lap_marks }),
+	contentType: "application/json",
+	success: fix_laps,
+	dataType: "json"
+    });
+}
+
+function fix_laps( data ) {
+    data.forEach( function(v) {
+	var elts = $("#rider-"+v.id);
+	if( v.sync == 0 ) {
+	    // Hope this doesn't happen. Can't really be handled in
+	    // the front end
+	} else {
+	    elts.children('.lap-time').text(
+		"Lap: " + ms_format( v.lap_time )
+	    );
+	    elts.children('.total-time').text(
+		"Total: " + ms_format( v.total_time )
+	    );
+	}
+	marks[v.timing_number].sync = true;
+
+	// In case we want to use lap + total to predict next riders,
+	// instead of just least-recently-crossed.
+	marks[v.timing_number].lap_time = v.lap_time;
+	marks[v.timing_number].total_time = v.total_time;
+    });
+    
+    to_sync = to_sync.filter( function( value, index, arr ) { !value.sync } );
 }

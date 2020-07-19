@@ -51,7 +51,7 @@ function fix_marks( data ) {
 	}
 	timer_marks[v.mark_number].sync = true;
     });
-    to_sync = to_sync.filter( function( value, index, arr ) { value.sync } );
+    to_sync = to_sync.filter( function( value, index, arr ) { !value.sync } );
 }
 
 function mark() {

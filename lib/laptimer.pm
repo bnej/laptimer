@@ -83,6 +83,39 @@ post '/club/:club/:event/timing' => sub {
     return $r;
 };
 
+post '/club/:club/:event/lap_data' => sub {
+    my $club = params->{club};
+    my $event = params->{event};
+
+    my $laps = params->{laps};
+
+    my $sth = database->prepare("insert into place_mark (event_id, timing_number, athlete_id) values (?,?,?)") or die database->errstr;
+    my $a_laps = database->prepare("select * from place_mark join time_mark using (timing_number, event_id) where athlete_id = ? and event_id = ? order by timing_number desc") or die database->errstr;
+
+    my $r = [ ];
+    foreach my $lap (@$laps) {
+	my $ok =
+	    $sth->execute( $event, $lap->{timing_number}, $lap->{id} );
+	
+	$a_laps->execute( $lap->{id}, $event ) or die $a_laps->errstr;
+	my $last = $a_laps->fetchrow_hashref;
+	my $previous = $a_laps->fetchrow_hashref;
+
+	my $lr = {
+	    id => $lap->{id},
+	    sync => $ok,
+	    timing_number => $lap->{timing_number}
+	};
+	$lr->{lap_time} = $lr->{total_time} = $last->{timing_mark};
+	if( $previous ) {
+	    $lr->{lap_time} = $last->{timing_mark} - $previous->{timing_mark};
+	}
+	push @$r, $lr;
+    }
+
+    return $r;
+};
+
 get '/club/:club/:event/stopwatch' => sub {
     my $club = params->{club};
     my $event = params->{event};
