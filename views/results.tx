@@ -4,8 +4,8 @@
 <div class="container-fluid topbar">
   <div class="row">
     <div class="col-xl-12">
-      <h2><: $event_info.club_name :></h1>
-      <h2>Results: <: $event_info.event_name :></h2>
+      <h2><: $event_info.club_name :></h2>
+      <h3>Results: <: $event_info.event_name :></h3>
     </div>
   </div>
 </div>

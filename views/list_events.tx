@@ -4,7 +4,8 @@
 <div class="container-fluid topbar">
   <div class="row">
     <div class="col-xl-12">
-      <h2><: $club.club_name :></h1>
+      <h2><: $club.club_name :></h2>
+      <h3>Event List</h3>
     </div>
   </div>
 </div>
@@ -15,13 +16,33 @@
       <thead class="thead-light">
 	<tr>
 	  <th scope="col">Event</th>
-	  <th scope="col">Start Lap</th>
-	  <th scope="col">Laps</th>
-	  <th scope="col">Active</th>
 	  <th scope="col">Links</th>
 	</tr>
       </thead>
       <tbody>
+	: for $events -> $event {
+	<tr>
+	  <td><: $event.event_name :></td>
+	  <td>
+	    <a 
+	       href="<: $event.url :>/stopwatch">Stop Watch</a>
+	    | <a 
+	       href="<: $event.url :>/lap">Lap Counting</a>
+	    | <a 
+	       href="<: $event.url :>/results">Results
+	      : if $event.event_active {
+	      [live]
+	      : }
+	      : else {
+	      [final]
+	      : }
+	    </a>
+	  </td>
+	</tr>
+	: }
+	: else {
+        <tr><td colspan="5">No events.</td></tr>
+	: }
       </tbody>
     </table>
   </div>

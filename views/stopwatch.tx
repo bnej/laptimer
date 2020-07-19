@@ -8,7 +8,7 @@
   <div class="row">
     <div class="col-xl-12">
       <h2><: $event_info.club_name :></h1>
-      <h2>Timing: <: $event_info.event_name :></h2>
+      <h3>Timing: <: $event_info.event_name :></h3>
     </div>
   </div>
 </div>

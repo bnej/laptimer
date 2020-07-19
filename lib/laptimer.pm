@@ -29,32 +29,30 @@ get '/' => sub {
 get '/club/:club' => sub {
     my $club = params->{club};
     my $sth = database->prepare(
-	"select * from club where club_id = $club"
+	"select * from club where club_id = ?"
 	);
     $sth->execute( $club );
     my $cr = $sth->fetchrow_hashref;
-
-    template 'list_events', {
-	club => $cr,
-	cluburl => "/club/$club"
-    };
-};
-
-get '/club/:club/events' => sub {
-    my $club = params->{club};
-    my $sth = database->prepare(
+    
+    $sth = database->prepare(
 	"select * from event where club_id = ? order by event_id"
 	) or die database->errstr;
     $sth->execute($club) or die $sth->errstr;
-
+    
     my @r = ( );
     while( my $r = $sth->fetchrow_hashref ) {
+	my $id = $r->{event_id};
+	$r->{url} = "/club/$club/$id";
 	push @r, $r;
     }
 
-    return \@r;
+    template 'list_events', {
+	club => $cr,
+	cluburl => "/club/$club",
+	events => \@r,
+    };
 };
-	
+
 get '/club/:club/:event/timing' => sub {
     my $club = params->{club};
     my $event = params->{event};
