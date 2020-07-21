@@ -73,7 +73,8 @@ hook 'before' => sub {
     if( request->path_info =~ m{^/club/([A-Za-z0-9]+)} ) {
 	my $club = $1;
 
-	if( session('user')->{club_id} eq $club ) {
+	my $user = session('user');
+	if( $user && $user->{club_id} eq $club ) {
 	    # All OK
 	} else {
 	    var requested_path => request->path_info;
