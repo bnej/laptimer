@@ -10,8 +10,22 @@
   </div>
 </div>
 
-<div class="row">
-  <div class="col-12">
+<div class="container-fluid">
+  <div class="row break-above">
+    <div class="col-12">
+      : given $error {
+      : when "insert_fail" {
+      <div class="alert alert-danger" role="alert">
+	Failed to insert new event - database insert failed.
+      </div>
+      : }
+      : when "missing_field" {
+      <div class="alert alert-danger" role="alert">
+	Please fill in all fields. Use Start Mark 0 to start from
+	stopwatch start, Start Mark 1 to start each rider separately.
+      </div>
+      : }
+    : }
     <table class="table" id="event-table">
       <thead class="thead-light">
 	<tr>
@@ -21,13 +35,17 @@
       </thead>
       <tbody>
 	: for $events -> $event {
-	<tr>
+      <tr
+	: if $event.hilight {
+	class="table-success"
+	: }
+	>
 	  <td><: $event.event_name :></td>
 	  <td>
 	    <a 
-	       href="<: $event.url :>/stopwatch">Stop Watch</a>
+	       href="<: $event.url :>/stopwatch">Stopwatch</a>
 	    | <a 
-	       href="<: $event.url :>/lap">Lap Counting</a>
+	       href="<: $event.url :>/lap">Laps</a>
 	    | <a 
 	       href="<: $event.url :>/results">Results
 	      : if $event.event_active {
@@ -45,7 +63,36 @@
 	: }
       </tbody>
     </table>
+    
+    </div>
+  </div>
+  
+  <div class="row">
+    <div class="col-1"></div>
+    <div class="col-10">
+      <form method="POST" action="<: $club.url :>/new_event">
+	<div class="form-group">
+	  <label for="event_name">Event Name</label>
+	  <input type="text" class="form-control"
+		 name="event_name"
+		 id="event_name">
+	</div>
+	<div class="form-group">
+	  <label for="event_start">Start Mark</label>
+	  <input type="text" class="form-control"
+		 id="event_start"
+		 name="event_start">
+	</div>
+	<div class="form-group">
+	  <label for="event_start">Total Laps</label>
+	  <input type="text" class="form-control"
+		 id="total_laps"
+		 name="total_laps">
+	</div>
+	<button type="submit" class="btn btn-primary">New Event</button>
+      </form>
+    </div>
+    <div class="col-md-1"></div>
   </div>
 </div>
-
 : }

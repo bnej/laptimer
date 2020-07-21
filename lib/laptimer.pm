@@ -28,11 +28,16 @@ get '/' => sub {
 
 get '/club/:club' => sub {
     my $club = params->{club};
+
+    my $hilight = params->{hilight} || 0;
+    my $error = params->{error} || '';
+    
     my $sth = database->prepare(
 	"select * from club where club_id = ?"
 	);
     $sth->execute( $club );
     my $cr = $sth->fetchrow_hashref;
+    $cr->{url} = "/club/$club";
     
     $sth = database->prepare(
 	"select * from event where club_id = ? order by event_id"
@@ -42,6 +47,10 @@ get '/club/:club' => sub {
     my @r = ( );
     while( my $r = $sth->fetchrow_hashref ) {
 	my $id = $r->{event_id};
+	$r->{hilight} = 0;
+	if($hilight == $id) {
+	    $r->{hilight} = 1;
+	}
 	$r->{url} = "/club/$club/$id";
 	push @r, $r;
     }
@@ -50,7 +59,32 @@ get '/club/:club' => sub {
 	club => $cr,
 	cluburl => "/club/$club",
 	events => \@r,
+	error => $error,
     };
+};
+
+post '/club/:club/new_event' => sub {
+    my $club = params->{club};
+    my $event_name = params->{event_name};
+    my $event_start = params->{event_start};
+    my $total_laps = params->{total_laps};
+
+    unless( $event_name && $event_start && $total_laps ) {
+	return redirect "/club/$club?error=missing_field";
+    }
+
+    my $sth = database->prepare(
+	"insert into event (club_id, event_name, start_lap, total_laps, event_active) values (?,?,?,?,true) returning event_id"
+	) or die database->errstr;
+    
+    my $inserted = $sth->execute($club, $event_name, $event_start, $total_laps) or die $sth->errstr;
+    if($inserted) {
+	my $r = $sth->fetchrow_hashref;
+	my $event_id = $r->{event_id};
+	return redirect "/club/$club?hilight=$event_id";
+    } else {
+	return redirect "/club/$club?error=insert_fail";
+    }
 };
 
 get '/club/:club/:event/timing' => sub {
