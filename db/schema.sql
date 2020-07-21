@@ -4,6 +4,13 @@ create table club (
     primary key (club_id)
 );
 
+create table club_user (
+    club_id varchar(10) not null references club(club_id) on delete cascade,
+    username varchar(20) not null,
+    password varchar(64) not null,
+    primary key (username)
+);
+
 create table event (
     club_id      varchar(10) references club(club_id) on delete cascade,
     event_id     serial not null,

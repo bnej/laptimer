@@ -1,0 +1,41 @@
+: cascade layouts::main
+: around body {
+
+<div class="container-fluid topbar">
+  <div class="row">
+    <div class="col-xl-12">
+      <h2><: $club.club_name :></h2>
+      <h3>Club Log In</h3>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid">
+  <div class="row break-above">
+    <div class="col-12">
+      : if $failed {
+      <div class="alert alert-danger" role="alert">
+	Log In failed. Check username and password.
+      </div>
+      : }
+      <form method="POST" action="/login">
+	<div class="form-group">
+	  <label for="event_name">Username</label>
+	  <input type="text" class="form-control"
+		 name="username"
+		 id="username">
+	</div>
+	<div class="form-group">
+	  <label for="event_start">Password</label>
+	  <input type="password" class="form-control"
+		 id="password"
+		 name="password">
+	</div>
+	<button type="submit" class="btn btn-primary">Log In</button>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+:}

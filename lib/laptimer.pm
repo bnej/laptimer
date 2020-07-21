@@ -5,6 +5,8 @@ package laptimer;
 use Dancer ':syntax';
 use Dancer::Plugin::Database;
 use Dancer::Exception qw(:all);
+
+use Crypt::SaltedHash;
 use POSIX qw(ceil floor);
 
 our $VERSION = '0.1';
@@ -24,6 +26,60 @@ get '/' => sub {
     template 'index', {
         "clubs" => \@clubs,
     };
+};
+
+get '/login' => sub {
+    template 'login', {
+	path => vars->{requested_path},
+	failed => params->{failed}
+    };
+};
+
+post '/login' => sub {
+    my $username = params->{username} || '';
+    my $password = params->{password} || '';
+    
+    my $user = database->quick_select(
+	'club_user',
+	{ username => $username }
+	);
+
+    my $csh = Crypt::SaltedHash->new(algorithm => 'SHA-1');
+    if($user) {
+	if( $csh->validate( $user->{password}, $password ) ) {
+	    session user => $user;
+	    redirect params->{path} || '/';
+	} else {
+            warning("Login failed - password incorrect for $username");
+            redirect '/login?failed=1';
+        }
+    } else {
+	warning("Login failed - unrecognised user $username");
+	redirect '/login?failed=1';
+    }
+};
+
+post '/logout' => sub {
+    session user => undef;
+    redirect '/';
+};
+
+hook 'before_template_render' => sub {
+    my $tokens = shift;
+    $tokens->{user} = session 'user';
+};
+
+hook 'before' => sub {
+    if( request->path_info =~ m{^/club/([A-Za-z0-9]+)} ) {
+	my $club = $1;
+
+	if( session('user')->{club_id} eq $club ) {
+	    # All OK
+	} else {
+	    var requested_path => request->path_info;
+	    request->path_info('/login');
+	}
+    }
 };
 
 get '/club/:club' => sub {
