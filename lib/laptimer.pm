@@ -341,12 +341,12 @@ get '/club/:club/:event/results' => sub {
 
 	$athletes{$id}{name} = $r->{athlete_name};
     }
-    my @results_table = sort { $b->{finished} <=> $a->{finished} || $a->{total} <=> $b->{total} } values %athletes;
+    my @results_table = sort { $b->{event_laps} <=> $a->{event_laps} || $a->{total} <=> $b->{total} } values %athletes;
     for( my $i = 0; $i < @results_table; $i ++ ) {
 	if( $results_table[$i]{finished} ) {
 	    $results_table[$i]{place} = $i + 1;
 	} else {
-	    $results_table[$i]{place} = "DNF";
+	    $results_table[$i]{place} = ($i + 1)."*";
 	}
 	$results_table[$i]{fastest} = ms_format($results_table[$i]{fastest});
 	$results_table[$i]{total} = ms_format($results_table[$i]{total});
