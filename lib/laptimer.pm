@@ -311,6 +311,7 @@ get '/club/:club/:event/results' => sub {
 		prior => 0,
 		name => undef,
 		finished => 0,
+		n => 0,
 	    };
 	}
 	next if $athletes{$id}{finished};
@@ -319,16 +320,19 @@ get '/club/:club/:event/results' => sub {
 	$athletes{$id}{prior} = $time;
 	push @{$athletes{$id}{laps}}, $lap;
 	
-	my $event_laps = ++ $athletes{$id}{event_laps};
-	if( $event_laps >= $cr->{total_laps} ) {
-	    $athletes{$id}{finished} = 1;
+	if($athletes{$id}{n} >= $cr->{start_lap}) {
+	    my $event_laps = ++ $athletes{$id}{event_laps};
+	    if( $event_laps >= $cr->{total_laps} ) {
+		$athletes{$id}{finished} = 1;
+	    }
+	    $athletes{$id}{total} += $lap;
+	    if(defined $athletes{$id}{fastest}) {
+		$athletes{$id}{fastest} = $lap if $lap < $athletes{$id}{fastest};
+	    } else {
+		$athletes{$id}{fastest} = $lap; # First lap in event
+	    }
 	}
-	$athletes{$id}{total} += $lap;
-	if(defined $athletes{$id}{fastest}) {
-	    $athletes{$id}{fastest} = $lap if $lap < $athletes{$id}{fastest};
-	} else {
-	    $athletes{$id}{fastest} = $lap; # First lap in event
-	}
+	$athletes{$id}{n} ++;
     }
     
     foreach my $id (keys %athletes) {
