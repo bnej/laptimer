@@ -380,6 +380,7 @@ sub ms_format {
     my $p_ms = $ms % 1000; # milliseconds
     my $p_seconds = floor( $ms / 1000 ); # Whole seconds
     my $p_minutes = floor( $p_seconds / 60 ); # Whole minutes
+    $p_seconds = $p_seconds % 60; # remove minutes
     
     return sprintf('%1d:%02d.%0'.$ms_places.'d',$p_minutes,$p_seconds,$p_ms);
 }
