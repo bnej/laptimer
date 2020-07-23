@@ -19,7 +19,9 @@ get '/' => sub {
 
     my @clubs;
     while( my $r = $sth->fetchrow_hashref ) {
-	$r->{url} = "/club/".$r->{club_id};
+	my $club_id = $r->{club_id};
+	$r->{url} = "/club/$club_id";
+	$r->{results_url} = "/results/$club_id";
 	push @clubs, $r;
     }
     
@@ -279,7 +281,35 @@ get '/club/:club/:event/stopwatch' => sub {
 			    "baseurl" => "/club/$club/$event" };
 };
 
-get '/club/:club/:event/results' => sub {
+get '/results/:club' => sub {
+    my $club = params->{club};
+    
+    my $sth = database->prepare(
+	"select * from club where club_id = ?"
+	);
+    $sth->execute( $club );
+    my $cr = $sth->fetchrow_hashref;
+    
+    $sth = database->prepare(
+	"select * from event where club_id = ? order by event_id"
+	) or die database->errstr;
+    $sth->execute( $club );
+
+    my @r;
+    while( my $r = $sth->fetchrow_hashref ) {
+	my $id = $r->{event_id};
+	$r->{url} = "/results/$club/$id";
+	push @r, $r;
+    }
+    
+    template 'list_results', {
+	"club" => $cr,
+        "events" => \@r,
+    };
+
+};
+
+get '/results/:club/:event' => sub {
     my $club = params->{club};
     my $event = params->{event};
 

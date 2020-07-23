@@ -141,6 +141,7 @@ function athlete_lap( ) {
 
     $("#lap-count-back").text( tail_lap );
     $("#lap-count-front").text( front_lap );
+    $("#count-marks").text( mark_number - 1 );
 
     $(this).detach()
     $(this).children(".lap-counter").text( lap[ id ] );

@@ -1,9 +1,10 @@
 : cascade layouts::main
 : around body {
+
 <div class="container-fluid topbar">
   <div class="row">
     <div class="col-xl-12">
-      <h6>Lap Timing</h6>
+      <h6><: $club.club_name :> - Results</h6>
     </div>
   </div>
 </div>
@@ -12,24 +13,21 @@
   <div class="row break-above">
     <div class="col-12">
       <ul class="list-group">
-	: for $clubs -> $club {
+	: for $events -> $event {
 	<li class="list-group-item">
-	  <a href="<: $club.url :>">
-	    : $club.club_name
-	  </a>
-	  <a style="float: right; clear: right"  href="<: $club.results_url :>">
-	    Results
-	  </a>
+	  <a href="<: $event.url :>"><: $event.event_name :></a>
+	  : if $event.event_active {
+	  [live]
+	  : }
+	  : else {
+	  [final]
+	  : }
 	</li>
 	: }
 	: else {
-	<li class="list-group-item">
-	  No clubs
-	</li>
+        <li class="list-group-item">No events.</li>
 	: }
-      </ul>
     </div>
   </div>
 </div>
-
 : }

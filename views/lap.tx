@@ -7,19 +7,21 @@
 <div class="container-fluid topbar">
   <div class="row">
     <div class="col-xl-12">
-      <h2><: $event_info.club_name :></h2>
-      <h3>Laps: <: $event_info.event_name :></h3>
+      <h6>Laps: <: $event_info.event_name :></h6>
     </div>
   </div>
 </div>
 
 <div class="container-fluid">
   <div class="row">
-    <div class="col-6" >
-      <h1><span id="lap-count-back" class="badge badge-warning">0</span> Back</h1>
+    <div class="col-4" >
+      <h2><span id="lap-count-back" class="badge badge-warning">0</span> Back</h2>
     </div>
-    <div class="col-6" style="text-align: right">
-      <h1>Front <span id="lap-count-front" class="badge badge-success">0</span></h1>
+    <div class="col-4">
+      <h2 style="text-align: center;"><span id="count-marks" class="badge badge-secondary">0</span></h2>
+    </div>
+    <div class="col-4" style="text-align: right">
+      <h2>Front <span id="lap-count-front" class="badge badge-success">0</span></h2>
     </div>
   </div>
   

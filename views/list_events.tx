@@ -4,8 +4,7 @@
 <div class="container-fluid topbar">
   <div class="row">
     <div class="col-xl-12">
-      <h2><: $club.club_name :></h2>
-      <h3>Event List</h3>
+      <h6><: $club.club_name :> - Events</h6>
     </div>
   </div>
 </div>
@@ -46,14 +45,6 @@
 	       href="<: $event.url :>/stopwatch">Stopwatch</a>
 	    | <a 
 	       href="<: $event.url :>/lap">Laps</a>
-	    | <a 
-	       href="<: $event.url :>/results">Results
-	      : if $event.event_active {
-	      [live]
-	      : }
-	      : else {
-	      [final]
-	      : }
 	    </a>
 	  </td>
 	</tr>

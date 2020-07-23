@@ -13,6 +13,7 @@ text-decoration: none;
 .topbar {
     background-color: #f33;
     color: #fff;
+    padding-top: 8px;
 }
 
 #timer-current {
