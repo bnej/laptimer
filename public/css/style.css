@@ -10,6 +10,10 @@ color: white;
 text-decoration: none;
 }
 
+.results-table {
+    white-space: nowrap;
+}
+
 .topbar {
     background-color: #f33;
     color: #fff;
