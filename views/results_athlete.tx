@@ -5,6 +5,7 @@
   <div class="row">
     <div class="col-xl-12">
       <h6><: $event_info.club_name :> - <: $event_info.event_name :></h6>
+      <h6><: $athlete.athlete_name :></h6>
     </div>
   </div>
 </div>
@@ -16,25 +17,29 @@
 	     
 	<thead class="thead-dark">
 	  <tr>
-	    <th scope="col" style="width: 40px;">Place</th>
-	    <th scope="col">Rider</th>
-	    <th scope="col">Laps</th>
-	    <th scope="col">Best Lap</th>
-	    <th scope="col">Total Time</th>
+	    <th scope="col" style="width: 40px;">Lap</th>
+	    <th scope="col">Time</th>
+	    <th scope="col">Split</th>
+	    <th scope="col">Total</th>
 	  </tr>
 	</thead>
 	<tbody>
 	  : for $results -> $item {
-	  <tr>
-	    <td><: $item.place :></td>
-	    <td><a href="<: $item.url :>"><: $item.name :></a></td>
-	    <td><: $item.event_laps :></td>
-	    <td><: $item.fastest :></td>
-	    <td><: $item.total :></td>
+	  <tr
+	    : if $item.fastest {
+	    class="table-success"
+	    : } else if $item.slowest {
+	    class="table-danger"
+	    : }
+	    >
+	    <td><: $item.lap_n :></td>
+	    <td><code><: $item.lap :></code></td>
+	    <td><code><: $item.split :></code></td>
+	    <td><code><: $item.total :></code></td>
 	  </tr>
 	  : }
 	  : else {
-          <tr><td colspan="5">No event results.</td></tr>
+          <tr><td colspan="5">No result.</td></tr>
 	  : }
 	</tbody>
       </table>

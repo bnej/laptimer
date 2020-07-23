@@ -282,6 +282,22 @@ get '/club/:club/:event/stopwatch' => sub {
 			    "baseurl" => "/club/$club/$event" };
 };
 
+get '/club/:club/:event/lap' => sub {
+    my $club = params->{club};
+    my $event = params->{event};
+    
+    my $sth = database->prepare(
+	"select * from club join event using (club_id) where club_id = ? and event_id = ?"
+	);
+    $sth->execute($club, $event);
+    my $cr = $sth->fetchrow_hashref();
+    template 'lap', {
+	"event_info" => $cr,
+	"baseurl" => "/club/$club/$event",
+	"cluburl" => "/club/$club",
+    };
+};
+
 get '/results/:club' => sub {
     my $club = params->{club};
     
@@ -335,6 +351,7 @@ get '/results/:club/:event' => sub {
 	my $time = $r->{timing_mark};
 	if( !$athletes{$id} ) {
 	    $athletes{$id} = {
+		url => "/results/$club/$event/$id",
 		laps => [ ],
 		fastest => undef,
 		total => 0,
@@ -389,35 +406,107 @@ get '/results/:club/:event' => sub {
         "cluburl" => "/club/$club",
         "results" => \@results_table,
     };
-
 };
 
-get '/club/:club/:event/lap' => sub {
+get '/results/:club/:event/:athlete' => sub {
     my $club = params->{club};
     my $event = params->{event};
-    
-    my $sth = database->prepare(
+    my $athlete = params->{athlete};
+
+    my $sth_club = database->prepare(
 	"select * from club join event using (club_id) where club_id = ? and event_id = ?"
 	);
-    $sth->execute($club, $event);
-    my $cr = $sth->fetchrow_hashref();
-    template 'lap', {
-	"event_info" => $cr,
-	"baseurl" => "/club/$club/$event",
-	"cluburl" => "/club/$club",
+    $sth_club->execute($club, $event);
+    my $cr = $sth_club->fetchrow_hashref();
+
+    my $sth_a = database->prepare(
+	'select * from athlete where athlete_id = ?'
+	) or die database->errstr;
+    $sth_a->execute($athlete);
+    my $ar = $sth_a->fetchrow_hashref;
+    
+    my $sth = database->prepare(
+	"select * from place_mark join time_mark using (timing_number, event_id) where event_id = ?  and athlete_id = ? order by timing_number asc"
+	) or die database->errstr;
+    $sth->execute( $event, $athlete );
+
+
+    my @laps = ( );
+
+    # These are the positions, not the times.
+    my $fastest = 0;
+    my $slowest = 0;
+    
+    my $total = 0;
+    my $event_laps = 0;
+    my $prior = 0;
+    my $finished = 0;
+    my $n = 0;
+    while( my $r = $sth->fetchrow_hashref ) {
+	my $time = $r->{timing_mark};
+
+	my $lap = $time - $prior;
+	$prior = $time;
+
+	if( $n >= $cr->{start_lap} ) {
+	    push @laps, $lap;
+	    if( $lap > $laps[$slowest] ) {
+		$slowest = $event_laps;
+	    } elsif( $lap < $laps[$fastest] ) {
+		$fastest = $event_laps;
+	    }
+	    $event_laps ++;
+	    if( $event_laps >= $cr->{total_laps} ) {
+		$finished = 1;
+	    }
+	}
+	$n ++;
+	last if $finished;
+    }
+
+    my @r = ( );
+    $total = 0;
+    for( my $i = 0; $i < @laps; $i ++ ) {
+	my $lap = $laps[$i];
+	$total += $lap;
+	my $split = '';
+	if( $i > 0 ) {
+	    $split = ms_format($lap - $laps[$i - 1], 3, '+');
+	}
+	push @r, {
+	    lap_n => $i + 1,
+	    fastest => ( $i == $fastest ? 1 : 0 ),
+	    slowest => ( $i == $slowest ? 1 : 0 ),
+	    lap => ms_format($lap),
+	    split => $split,
+	    total => ms_format($total),
+	};
+    }
+	    
+    template 'results_athlete', {
+	event_info => $cr,
+	athlete => $ar,
+	results => \@r,
     };
 };
+
 
 sub ms_format {
     my $ms = shift;
     my $ms_places = shift || 3;
+    my $prefix = shift || "";
+    
+    if( $ms < 0 ) {
+	$prefix = '-';
+	$ms = abs($ms);
+    }
 
     my $p_ms = $ms % 1000; # milliseconds
     my $p_seconds = floor( $ms / 1000 ); # Whole seconds
     my $p_minutes = floor( $p_seconds / 60 ); # Whole minutes
     $p_seconds = $p_seconds % 60; # remove minutes
     
-    return sprintf('%1d:%02d.%0'.$ms_places.'d',$p_minutes,$p_seconds,$p_ms);
+    return sprintf('%s%1d:%02d.%0'.$ms_places.'d',$prefix,$p_minutes,$p_seconds,$p_ms);
 }
 
 true;
