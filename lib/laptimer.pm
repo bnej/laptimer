@@ -49,8 +49,9 @@ post '/login' => sub {
     my $csh = Crypt::SaltedHash->new(algorithm => 'SHA-1');
     if($user) {
 	if( $csh->validate( $user->{password}, $password ) ) {
+	    my $club_id = $user->{club_id};
 	    session user => $user;
-	    redirect params->{path} || '/';
+	    redirect "/club/$club_id";
 	} else {
             warning("Login failed - password incorrect for $username");
             redirect '/login?failed=1';
