@@ -10,6 +10,13 @@ color: white;
 text-decoration: none;
 }
 
+.btn-xl {
+    padding: 0.5rem 1rem;
+    font-size: 2.0rem;
+    line-height: 4.0rem;
+    border-radius: 0.6rem;
+}
+
 .results-table {
     white-space: nowrap;
 }
@@ -26,7 +33,7 @@ text-decoration: none;
 }
 
 .rider .rider-marker {
-    font-size: 120%;
+    font-size: 110%;
 }
 
 .rider .lap-time {
@@ -37,7 +44,8 @@ text-decoration: none;
     float:right;
 }
 
-.rider .lap-counter {
+.rider .lap-counter{
+    font-size: 110%;
     float: right;
 }
 

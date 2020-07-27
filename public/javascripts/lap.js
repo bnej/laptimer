@@ -166,12 +166,14 @@ function fix_laps( data ) {
 	    // Hope this doesn't happen. Can't really be handled in
 	    // the front end
 	} else {
+	    /* Too much space on a phone 
 	    elts.children('.lap-time').text(
 		"Lap: " + ms_format( v.lap_time )
 	    );
 	    elts.children('.total-time').text(
 		"Total: " + ms_format( v.total_time )
 	    );
+	    */
 	}
 	marks[v.timing_number].sync = true;
 

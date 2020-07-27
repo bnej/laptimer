@@ -15,13 +15,13 @@
 <div class="container-fluid">
   <div class="row">
     <div class="col-4" >
-      <h2><span id="lap-count-back" class="badge badge-warning">0</span> Back</h2>
+      <h3><span id="lap-count-back" class="badge badge-warning">0</span></h3>
     </div>
     <div class="col-4">
-      <h2 style="text-align: center;"><span id="count-marks" class="badge badge-secondary">0</span></h2>
+      <h3 style="text-align: center;"><span id="count-marks" class="badge badge-secondary">0</span></h3>
     </div>
     <div class="col-4" style="text-align: right">
-      <h2>Front <span id="lap-count-front" class="badge badge-success">0</span></h2>
+      <h3><span id="lap-count-front" class="badge badge-success">0</span></h3>
     </div>
   </div>
   

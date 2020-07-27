@@ -24,15 +24,15 @@
   </div>
   
   <div class="row">
-    <div class="col-6">
+    <div class="col-12">
       <button type="button"
-	      class="btn btn-success btn-lg btn-block"
+	      class="btn btn-success btn-xl btn-block"
 	      id="start-stop"
 	      onclick="start_stop($('#start-stop'));">Start</button>
     </div>
-    <div class="col-6">
+    <div class="col-12">
       <button type="button"
-	      class="btn btn-primary btn-lg btn-block"
+	      class="btn btn-primary btn-xl btn-block"
 	      id="mark-time"
 	      onclick="mark();">Mark</button>
     </div>
@@ -58,7 +58,8 @@
 
 <script>
 var baseurl = '<: $baseurl :>';
-$('#timer-current').text( ms_format( 0, 0 ) );
+    $('#timer-current').text( ms_format( 0, 0 ) );
+    $('#mark-time').hide();
 load_marks();
 </script>
 : }

@@ -17,6 +17,8 @@ function start_timer( button ) {
     button.addClass('btn-danger');
     button.removeClass('btn-success');
     button.text("Stop");
+    button.hide();
+    $('#mark-time').show();
 
     update_time();
 }
