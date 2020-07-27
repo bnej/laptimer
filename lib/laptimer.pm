@@ -352,7 +352,7 @@ get '/results/:club/:event' => sub {
     $sth_club->execute($club, $event);
     my $cr = $sth_club->fetchrow_hashref();
 
-    my $results_table = Laptimer::Results->load_results( $cr );
+    my $results_table = Laptimer::Results->event( $cr );
     
     template 'results', {
 	"event_info" => $cr,
@@ -378,69 +378,13 @@ get '/results/:club/:event/:athlete' => sub {
 	) or die database->errstr;
     $sth_a->execute($athlete);
     my $ar = $sth_a->fetchrow_hashref;
-    
-    my $sth = database->prepare(
-	"select * from place_mark join time_mark using (timing_number, event_id) where event_id = ?  and athlete_id = ? order by timing_number asc"
-	) or die database->errstr;
-    $sth->execute( $event, $athlete );
 
-
-    my @laps = ( );
-
-    # These are the positions, not the times.
-    my $fastest = 0;
-    my $slowest = 0;
-    
-    my $total = 0;
-    my $event_laps = 0;
-    my $prior = 0;
-    my $finished = 0;
-    my $n = 0;
-    while( my $r = $sth->fetchrow_hashref ) {
-	my $time = $r->{timing_mark};
-
-	my $lap = $time - $prior;
-	$prior = $time;
-
-	if( $n >= $cr->{start_lap} ) {
-	    push @laps, $lap;
-	    if( $lap > $laps[$slowest] ) {
-		$slowest = $event_laps;
-	    } elsif( $lap < $laps[$fastest] ) {
-		$fastest = $event_laps;
-	    }
-	    $event_laps ++;
-	    if( $event_laps >= $cr->{total_laps} ) {
-		$finished = 1;
-	    }
-	}
-	$n ++;
-	last if $finished;
-    }
-
-    my @r = ( );
-    $total = 0;
-    for( my $i = 0; $i < @laps; $i ++ ) {
-	my $lap = $laps[$i];
-	$total += $lap;
-	my $split = '';
-	if( $i > 0 ) {
-	    $split = ms_format($lap - $laps[$i - 1], 3, '+');
-	}
-	push @r, {
-	    lap_n => $i + 1,
-	    fastest => ( $i == $fastest ? 1 : 0 ),
-	    slowest => ( $i == $slowest ? 1 : 0 ),
-	    lap => ms_format($lap),
-	    split => $split,
-	    total => ms_format($total),
-	};
-    }
+    my $r = Laptimer::Results->laps( $cr, $athlete );
 	    
     template 'results_athlete', {
 	event_info => $cr,
 	athlete => $ar,
-	results => \@r,
+	results => $r,
     };
 };
 

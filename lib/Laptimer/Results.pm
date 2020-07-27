@@ -8,13 +8,37 @@ use Dancer::Plugin::Database;
 use Dancer::Exception qw(:all);
 use Laptimer::Util qw(:all);
 
-sub load_results {
+sub event {
     my ($class, $cr) = @_;
 
+    my $r;
     if( $cr->{event_active} ) {
-	return $class->load_live( $cr );
+	$r = $class->load_live( $cr );
     } else {
-	return $class->load_table( $cr );
+	$r = $class->load_table( $cr );
+    }
+    return $class->add_splits($r);
+}
+
+sub add_splits {
+    my ($class, $r) = @_;
+
+    my $best = $r->[0];
+    $best->{split} = '';
+    for( my $i = 1; $i < @$r; $i ++ ) {
+	$r->[$i]{split} = ms_format($r->[$i]{total_ms} - $best->{total_ms},3,'+');
+    }
+    return $r;
+}
+    
+
+sub laps {
+    my ($class, $cr, $athlete) = @_;
+
+    if( $cr->{event_active} ) {
+	return $class->laps_live( $cr, $athlete );
+    } else {
+	return $class->laps_table( $cr, $athlete );
     }
 }
 
@@ -91,10 +115,77 @@ sub load_live {
 	    $results_table[$i]{place} = ($i + 1)."*";
 	}
 	$results_table[$i]{fastest} = ms_format($results_table[$i]{fastest});
+	
+	$results_table[$i]{total_ms} = $results_table[$i]{total}; # save
 	$results_table[$i]{total} = ms_format($results_table[$i]{total});
     }
 
     return \@results_table;
+}
+
+sub laps_live {
+    my ($class, $cr, $athlete) = @_;
+    my $event = $cr->{event_id};
+    
+    my $sth = database->prepare(
+	"select * from place_mark join time_mark using (timing_number, event_id) where event_id = ?  and athlete_id = ? order by timing_number asc"
+	) or die database->errstr;
+    $sth->execute( $event, $athlete );
+
+
+    my @laps = ( );
+
+    # These are the positions, not the times.
+    my $fastest = 0;
+    my $slowest = 0;
+    
+    my $total = 0;
+    my $event_laps = 0;
+    my $prior = 0;
+    my $finished = 0;
+    my $n = 0;
+    while( my $r = $sth->fetchrow_hashref ) {
+	my $time = $r->{timing_mark};
+
+	my $lap = $time - $prior;
+	$prior = $time;
+
+	if( $n >= $cr->{start_lap} ) {
+	    push @laps, $lap;
+	    if( $lap > $laps[$slowest] ) {
+		$slowest = $event_laps;
+	    } elsif( $lap < $laps[$fastest] ) {
+		$fastest = $event_laps;
+	    }
+	    $event_laps ++;
+	    if( $event_laps >= $cr->{total_laps} ) {
+		$finished = 1;
+	    }
+	}
+	$n ++;
+	last if $finished;
+    }
+
+    my @r = ( );
+    $total = 0;
+    for( my $i = 0; $i < @laps; $i ++ ) {
+	my $lap = $laps[$i];
+	$total += $lap;
+	my $split = '';
+	if( $i > 0 ) {
+	    $split = ms_format($lap - $laps[$i - 1], 3, '+');
+	}
+	push @r, {
+	    lap_n => $i + 1,
+	    fastest => ( $i == $fastest ? 1 : 0 ),
+	    slowest => ( $i == $slowest ? 1 : 0 ),
+	    lap => ms_format($lap),
+	    split => $split,
+	    total => ms_format($total),
+	};
+    }
+
+    return \@r;
 }
 
 1;

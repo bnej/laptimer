@@ -54,3 +54,7 @@ text-decoration: none;
 .select-riders-form {
     width: 100%;
 }
+
+.result-split {
+    font-size: 70%;
+}

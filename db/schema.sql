@@ -43,3 +43,24 @@ create table place_mark (
     athlete_id integer references athlete (athlete_id) on delete cascade,
     primary key ( event_id, timing_number )
 );
+
+create table result_place (
+    event_id integer references event (event_id) on delete cascade,
+    place integer not null,
+    athlete_id integer references athlete (athlete_id) on delete cascade,
+    best_lap integer not null,
+    total_time integer not null,
+    primary key (event_id, place)
+);
+
+create index result_place_athlete_idx on result_place (athlete_id);
+
+create table result_lap (
+    event_id integer references event (event_id) on delete cascade,
+    athlete_id integer references athlete (athlete_id) on delete cascade,
+    lap integer not null,
+    lap_time integer not null,
+    primary key (athlete_id, lap)
+);
+
+create index result_lap_event_idx on result_lap (event_id);
