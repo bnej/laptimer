@@ -65,3 +65,7 @@ create table result_lap (
 );
 
 create index result_lap_event_idx on result_lap (event_id);
+
+alter table time_mark add time_ms bigint;
+
+alter table place_mark add place_ms bigint;

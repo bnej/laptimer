@@ -64,7 +64,8 @@ function mark() {
 	mark_number: num,
 	mark: delta,
 	mark_fmt: delta_fmt,
-	sync: false,
+	timestamp: current,
+	sync: false
     };
     timer_marks[ num ] = mark;
     to_sync.push( mark );

@@ -226,13 +226,13 @@ post '/club/:club/:event/timing' => sub {
 
     my $timing = params->{timing};
 
-    my $sth = database->prepare("insert into time_mark (event_id, timing_number, timing_mark) values (?,?,?)");
+    my $sth = database->prepare("insert into time_mark (event_id, timing_number, timing_mark, time_ms) values (?,?,?,?)");
     my $sth_fetch = database->prepare("select * from time_mark where event_id = ? and timing_number = ?");
 
     my $r = [ ];
     foreach my $time (@$timing) {
 	my $ok =
-	    $sth->execute( $event, $time->{mark_number}, $time->{mark} );
+	    $sth->execute( $event, $time->{mark_number}, $time->{mark}, $time->{timestamp} );
 
 	if( $ok ) {
 	    push @$r, { mark_number => $time->{mark_number},
@@ -257,13 +257,13 @@ post '/club/:club/:event/lap_data' => sub {
 
     my $laps = params->{laps};
 
-    my $sth = database->prepare("insert into place_mark (event_id, timing_number, athlete_id) values (?,?,?)") or die database->errstr;
+    my $sth = database->prepare("insert into place_mark (event_id, timing_number, athlete_id, place_ms) values (?,?,?,?)") or die database->errstr;
     my $a_laps = database->prepare("select * from place_mark join time_mark using (timing_number, event_id) where athlete_id = ? and event_id = ? order by timing_number desc") or die database->errstr;
 
     my $r = [ ];
     foreach my $lap (@$laps) {
 	my $ok =
-	    $sth->execute( $event, $lap->{timing_number}, $lap->{id} );
+	    $sth->execute( $event, $lap->{timing_number}, $lap->{id}, $lap->{timestamp} );
 	
 	$a_laps->execute( $lap->{id}, $event ) or die $a_laps->errstr;
 	my $last = $a_laps->fetchrow_hashref;

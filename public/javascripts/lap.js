@@ -153,11 +153,13 @@ function remaining( mark_number ) {
 function athlete_lap( ) {
     var id = parseInt(this.getAttribute("data-id"));
     var athlete = athletes[id];
+    var current = Date.now();
     
     var place_mark = {
 	"id": id,
 	"timing_number": mark_number,
-	"sync":false
+	"sync":false,
+	"timestamp":current
     };
     marks[mark_number] = place_mark;
     to_sync.push( place_mark );
