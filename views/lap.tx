@@ -85,5 +85,6 @@
   var baseurl = '<: $baseurl :>';
   var cluburl = '<: $cluburl :>';
   load_athletes();
+  init();
 </script>
 : }

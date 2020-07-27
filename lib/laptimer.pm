@@ -187,6 +187,19 @@ sub load_athletes {
     return \@r;
 }
 
+get '/club/:club/:event/info' => sub {
+    my $club = params->{club};
+    my $event = params->{event};
+
+    my $sth = database->prepare(
+	"select * from event where club_id = ? and event_id = ?"
+	) or die database->errstr;
+    $sth->execute( $club, $event );
+    my $er = $sth->fetchrow_hashref;
+
+    return $er;
+};
+
 get '/club/:club/athletes' => sub {
     my $club = params->{club};
 

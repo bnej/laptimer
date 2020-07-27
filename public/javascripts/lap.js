@@ -9,6 +9,9 @@ var mark_number = 1;
 var front_lap = 0;
 var tail_lap = 0;
 
+var start_lap = 0;
+var total_laps = 0;
+
 function min_lap( ) {
     var min_lap = lap[a_select[0].id]; // any is fine to start
     for( var i = 0; i < a_select.length; i++ ) {
@@ -25,6 +28,22 @@ function load_athletes( ) {
 	success: load_athletes_update,
 	dataType: "json"
     });
+}
+
+function init( ) {
+    $.ajax({
+	type: 'GET',
+	url: baseurl + "/info",
+	success: init_update,
+	datatype: "json"
+    });
+}
+
+function init_update( data ) {
+    start_lap = data.start_lap;
+    total_laps = data.total_laps;
+    $("#lap-count-back").text( remaining(0) );
+    $("#lap-count-front").text( remaining(0) );
 }
 
 function load_athletes_update( data ) {
@@ -114,8 +133,21 @@ function select_save_athletes( ) {
 		'<span class="badge badge-pill lap-counter badge-success">0</span>'+
 		'</li>'
 	);
+	if( start_lap > 0 ) {
+	    $('#rider-'+a.id).children('.lap-counter').text('N');
+	} else {
+	    $('#rider-'+a.id).children('.lap-counter').text(total_laps);
+	}
 	$('#rider-'+a.id).on( "click", athlete_lap );
     }
+}
+
+function remaining( mark_number ) {
+    var r = 'N';
+    if( mark_number >= start_lap ) {
+	r = total_laps - ( mark_number - start_lap );
+    }
+    return r
 }
 
 function athlete_lap( ) {
@@ -139,12 +171,12 @@ function athlete_lap( ) {
     if( lap[ id ] > front_lap ) front_lap = lap[ id ];
     tail_lap = min_lap();
 
-    $("#lap-count-back").text( tail_lap );
-    $("#lap-count-front").text( front_lap );
+    $("#lap-count-back").text( remaining(tail_lap) );
+    $("#lap-count-front").text( remaining(front_lap) );
     $("#count-marks").text( mark_number - 1 );
 
-    $(this).detach()
-    $(this).children(".lap-counter").text( lap[ id ] );
+    $(this).detach();
+    $(this).children(".lap-counter").text( remaining( lap[ id ] ) );
     $('#rider-list').append($(this));
 }
 
