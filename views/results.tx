@@ -1,4 +1,7 @@
 : cascade layouts::main
+: around title {
+  <: $event_info.club_name :> - <: $event_info.event_name :>
+: }
 : around body {
 : include toolbar { title => $event_info.club_name ~ " - " ~ $event_info.event_name }
 

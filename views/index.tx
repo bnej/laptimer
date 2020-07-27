@@ -1,4 +1,7 @@
 : cascade layouts::main
+: around title {
+  Velotime Lap Timing
+: }
 : around body {
 : include toolbar { title => 'Velotime Lap Timing' }
 

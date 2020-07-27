@@ -1,4 +1,7 @@
 : cascade layouts::main
+: around title {
+  Laps: <: $event_info.event_name :>
+: }
 : around js_head {
 <script src="<: $request.uri_base :>/javascripts/lap.js"></script>
 : }
