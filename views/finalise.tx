@@ -1,0 +1,22 @@
+: cascade layouts::main
+: around body {
+: include toolbar { title => 'Finalise - ' ~ $event_info.event_name }
+
+<div class="container-fluid">
+  <div class="row break-above">
+    <div class="col-12">
+      <div class="alert alert-info" role="alert">
+	<p>
+      	Press the button below to finalise the event. This will
+      	tabulate results and disable the timer apps for the event.
+	</p>
+      </div>
+      <form method="POST" action="<: $baseurl :>/finalise">
+	<button type="submit" class="btn btn-lg btn-block btn-primary">Finalise</button>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+:}

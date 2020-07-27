@@ -102,7 +102,7 @@ get '/club/:club' => sub {
     $cr->{url} = "/club/$club";
     
     $sth = database->prepare(
-	"select * from event where club_id = ? order by event_id"
+	"select * from event where club_id = ? and event_active order by event_id"
 	) or die database->errstr;
     $sth->execute($club) or die $sth->errstr;
     
@@ -312,6 +312,36 @@ get '/club/:club/:event/lap' => sub {
 	"baseurl" => "/club/$club/$event",
 	"cluburl" => "/club/$club",
     };
+};
+
+get '/club/:club/:event/finalise' => sub {
+    my $club = params->{club};
+    my $event = params->{event};
+
+    my $sth = database->prepare(
+	"select * from club join event using (club_id) where club_id = ? and event_id = ?"
+	);
+    $sth->execute($club, $event);
+    my $cr = $sth->fetchrow_hashref();
+    template 'finalise', {
+	"event_info" => $cr,
+	"baseurl" => "/club/$club/$event",
+	"cluburl" => "/club/$club",
+    };
+};
+
+post '/club/:club/:event/finalise' => sub {
+    my $club = params->{club};
+    my $event = params->{event};
+
+    my $sth = database->prepare(
+	"select * from club join event using (club_id) where club_id = ? and event_id = ?"
+	);
+    $sth->execute($club, $event);
+    my $cr = $sth->fetchrow_hashref();
+    Laptimer::Results->finalise( $cr );
+
+    redirect "/club/$club";
 };
 
 get '/results/:club' => sub {

@@ -52,6 +52,56 @@ sub athlete {
     return $sth_a->fetchrow_hashref;
 }
 
+sub finalise {
+    my ( $class, $cr ) = @_;
+    my $results = $class->load_live( $cr );
+    $class->flush_event( $cr );
+    my $event = $cr->{event_id};
+
+    my $ins_rp = database->prepare(
+	"insert into result_place values ( ?, ?, ?, ?, ? )"
+	) or die database->errstr;;
+    my $ins_rl = database->prepare(
+	"insert into result_lap values ( ?, ?, ?, ? )"
+	) or die database->errstr;
+    my $upd_f = database->prepare(
+	"update event set event_active = ? where event_id = ?"
+	) or die database->errstr;
+    
+    foreach my $r ( @$results ) {
+	$ins_rp->execute(
+	    $event,
+	    $r->{place},
+	    $r->{id},
+	    $r->{fastest_ms},
+	    $r->{total_ms}
+	    );
+	my $laps = $r->{laps};
+	my $i = 0;
+	foreach my $l ( @$laps ) {
+	    $i++;
+	    $ins_rl->execute( $event, $r->{id}, $i, $l );
+	}
+    }
+    $upd_f->execute( 0, $event ); # Mark completed
+}
+
+sub flush_event {
+    my ( $class, $cr ) = @_;
+    my $del_rp = database->prepare(
+	"delete from result_place where event_id = ?"
+	) or die database->errstr;
+
+    my $del_rl = database->prepare(
+	"delete from result_lap where event_id = ?"
+	) or die database->errstr;
+
+    $del_rp->execute( $cr->{event_id} );
+    $del_rl->execute( $cr->{event_id} );
+
+    return 1;
+}
+
 sub load_live {
     my ($class, $cr) = @_;
     my $club = $cr->{club_id};
@@ -71,6 +121,7 @@ sub load_live {
 	my $time = $r->{timing_mark};
 	if( !$athletes{$id} ) {
 	    $athletes{$id} = {
+		id => $id,
 		url => "/results/$club/$event/$id",
 		laps => [ ],
 		fastest => undef,
@@ -86,10 +137,11 @@ sub load_live {
 
 	my $lap = $time - $athletes{$id}{prior};
 	$athletes{$id}{prior} = $time;
-	push @{$athletes{$id}{laps}}, $lap;
 	
 	if($athletes{$id}{n} >= $cr->{start_lap}) {
 	    my $event_laps = ++ $athletes{$id}{event_laps};
+	    push @{$athletes{$id}{laps}}, $lap;
+	    
 	    if( $event_laps >= $cr->{total_laps} ) {
 		$athletes{$id}{finished} = 1;
 	    }
@@ -114,6 +166,7 @@ sub load_live {
 	} else {
 	    $results_table[$i]{place} = ($i + 1)."*";
 	}
+	$results_table[$i]{fastest_ms} = $results_table[$i]{fastest}; # save
 	$results_table[$i]{fastest} = ms_format($results_table[$i]{fastest});
 	
 	$results_table[$i]{total_ms} = $results_table[$i]{total}; # save
@@ -179,6 +232,7 @@ sub laps_live {
 	    lap_n => $i + 1,
 	    fastest => ( $i == $fastest ? 1 : 0 ),
 	    slowest => ( $i == $slowest ? 1 : 0 ),
+	    lap_ms => $lap,
 	    lap => ms_format($lap),
 	    split => $split,
 	    total => ms_format($total),
