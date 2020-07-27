@@ -201,6 +201,7 @@ sub load_live {
 	) or die database->errstr;
     
     $sth->execute( $event );
+    my @marks = ( );
 
     while( my $r = $sth->fetchrow_hashref ) {
 	my $id = $r->{athlete_id};
@@ -219,11 +220,15 @@ sub load_live {
 		n => 0,
 	    };
 	}
-	next if $athletes{$id}{finished};
 
+	# still calculate for marks list
 	my $lap = $time - $athletes{$id}{prior};
 	$athletes{$id}{prior} = $time;
+	push @marks, { mark => $r->{timing_number},
+		       id => $id, lap => $lap, time => $time };
 	
+	next if $athletes{$id}{finished};
+
 	if($athletes{$id}{n} >= $cr->{start_lap}) {
 	    my $event_laps = ++ $athletes{$id}{event_laps};
 	    push @{$athletes{$id}{laps}}, $lap;
@@ -258,7 +263,11 @@ sub load_live {
 	$results_table[$i]{total} = ms_format($results_table[$i]{total});
     }
 
-    return \@results_table;
+    if(wantarray) {
+	return (\@results_table, \@marks);
+    } else {
+	return \@results_table;
+    }
 }
 
 sub laps_live {

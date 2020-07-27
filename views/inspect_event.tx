@@ -1,0 +1,32 @@
+: cascade layouts::main
+: around title {
+  Inspect - <: $event_info.event_name :>
+: }
+: around body {
+: include toolbar { title => "Inspect - " ~ $event_info.event_name }
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <table class="table table-striped table-sm results-table">
+	<thead class="thead-dark">
+	  <tr>
+	    : for $header -> $h {
+	    <th scope="col"><: $h :></th>
+	    : }
+	  </tr>
+	</thead>
+	<tbody>
+	  : for $marks -> $m {
+	  <tr>
+	    : for $m -> $col {
+	    <td><: $col :></td>
+	    : }
+	  </tr>
+	  : }
+	</tbody>
+      </table>
+    </div>
+  </div>
+</div>
+: }

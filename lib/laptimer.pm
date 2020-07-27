@@ -149,6 +149,54 @@ post '/club/:club/new_event' => sub {
     }
 };
 
+get '/club/:club/:event/inspect' => sub {
+    my $club = params->{club};
+    my $event = params->{event};
+
+    my $sth = database->prepare(
+	"select * from club join event using (club_id) where club_id = ? and event_id = ?"
+	);
+    $sth->execute($club, $event);
+    my $cr = $sth->fetchrow_hashref();
+
+    my ($results, $marks) = Laptimer::Results->load_live( $cr );
+    my $j = 0;
+    my %a_id = ( );
+    foreach my $m (@$marks) {
+	my $id = $m->{id};
+	if( not defined $a_id{$id} ) {
+	    $a_id{$id} = $j;
+	    $j++;
+	}
+    }
+
+    my $n_r = scalar keys %a_id;
+    my @header = (0) x $n_r;
+    foreach my $k (keys %a_id) {
+	my $a = Laptimer::Results->athlete( $k );
+	@header[$a_id{$k}] = $a->{athlete_name};
+    }
+    unshift @header, "#";
+    
+    my @r = ( );
+    foreach my $m (@$marks) {
+	my $id = $m->{id};
+	my $row = [ ('') x $n_r ];
+	my $ix = $a_id{$id};
+
+	$row->[$ix] = ms_format( $m->{lap} );
+	unshift @$row, $m->{mark};
+	push @r, $row;
+    }
+
+    template 'inspect_event' => {
+	event => $cr,
+	cluburl => "/club/$club",
+	header => \@header,
+	marks => \@r,
+    };
+};
+
 get '/club/:club/:event/timing' => sub {
     my $club = params->{club};
     my $event = params->{event};
