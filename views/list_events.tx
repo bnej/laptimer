@@ -43,7 +43,7 @@
 	</tr>
 	: }
 	: else {
-        <tr><td colspan="5">No events.</td></tr>
+        <tr><td colspan="5">No active events.</td></tr>
 	: }
       </tbody>
     </table>
