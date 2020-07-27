@@ -1,13 +1,6 @@
 : cascade layouts::main
 : around body {
-
-<div class="container-fluid topbar">
-  <div class="row">
-    <div class="col-xl-12">
-      <h6><: $event_info.club_name :> - <: $event_info.event_name :></h6>
-    </div>
-  </div>
-</div>
+: include toolbar { title => $event_info.club_name ~ " - " ~ $event_info.event_name }
 
 <div class="container-fluid">
   <div class="row">

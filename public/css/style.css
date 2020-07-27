@@ -21,12 +21,6 @@ text-decoration: none;
     white-space: nowrap;
 }
 
-.topbar {
-    background-color: #f33;
-    color: #fff;
-    padding-top: 8px;
-}
-
 #timer-current {
     text-align: center;
     font-size: 38px;

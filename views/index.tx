@@ -1,12 +1,6 @@
 : cascade layouts::main
 : around body {
-<div class="container-fluid topbar">
-  <div class="row">
-    <div class="col-xl-12">
-      <h6>Lap Timing</h6>
-    </div>
-  </div>
-</div>
+: include toolbar { title => 'Velotime Lap Timing' }
 
 <div class="container-fluid">
   <div class="row break-above">

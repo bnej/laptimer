@@ -1,13 +1,7 @@
 : cascade layouts::main
 : around body {
+: include toolbar { title => 'Club Login' }
 
-<div class="container-fluid topbar">
-  <div class="row">
-    <div class="col-xl-12">
-      <h6>Club Log In</h6>
-    </div>
-  </div>
-</div>
 
 <div class="container-fluid">
   <div class="row break-above">

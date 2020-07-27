@@ -4,13 +4,7 @@
 : }
 : around body {
 
-<div class="container-fluid topbar">
-  <div class="row">
-    <div class="col-xl-12">
-      <h6>Timing: <: $event_info.event_name :></h6>
-    </div>
-  </div>
-</div>
+:include toolbar_app { title => "Timing: " ~ $event_info.event_name }
 
 <div class="container-fluid">
   <div class="row">
@@ -57,7 +51,7 @@
 </div>
 
 <script>
-var baseurl = '<: $baseurl :>';
+  var baseurl = '<: $baseurl :>';
     $('#timer-current').text( ms_format( 0, 0 ) );
     $('#mark-time').hide();
 load_marks();

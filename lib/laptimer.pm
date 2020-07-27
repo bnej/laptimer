@@ -291,7 +291,8 @@ get '/club/:club/:event/stopwatch' => sub {
 	);
     $sth->execute($club, $event);
     my $cr = $sth->fetchrow_hashref();
-    template 'stopwatch', { event_info => $cr,
+    template 'stopwatch', { "event_info" => $cr,
+			    "cluburl" => "/club/$club",
 			    "baseurl" => "/club/$club/$event" };
 };
 

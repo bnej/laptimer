@@ -4,14 +4,9 @@
 : }
 
 : around body {
-<div class="container-fluid topbar">
-  <div class="row">
-    <div class="col-xl-12">
-      <h6>Laps: <: $event_info.event_name :></h6>
-    </div>
-  </div>
-</div>
 
+: include toolbar_app { title => "Laps: " ~ $event_info.event_name }
+  
 <div class="container-fluid">
   <div class="row">
     <div class="col-4" >
