@@ -61,7 +61,7 @@ create table result_lap (
     athlete_id integer references athlete (athlete_id) on delete cascade,
     lap integer not null,
     lap_time integer not null,
-    primary key (athlete_id, lap)
+    primary key (event_id, athlete_id, lap)
 );
 
 create index result_lap_event_idx on result_lap (event_id);

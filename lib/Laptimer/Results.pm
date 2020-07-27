@@ -81,7 +81,7 @@ sub finalise {
 	my $i = 0;
 	foreach my $l ( @$laps ) {
 	    $i++;
-	    $ins_rl->execute( $event, $r->{id}, $i, $l );
+	    $ins_rl->execute( $event, $r->{id}, $i, $l ) or die $ins_rl->errstr;
 	}
     }
     $upd_f->execute( 0, $event ); # Mark completed
