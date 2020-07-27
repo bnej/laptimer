@@ -386,9 +386,15 @@ get '/results/:club/:event' => sub {
     
     template 'results', {
 	"event_info" => $cr,
-	"baseurl" => "/club/$club/$event",
-        "cluburl" => "/club/$club",
-        "results" => $results_table,
+	    "baseurl" => "/results/$club/$event",
+	    "cluburl" => "/results/$club",
+	    "up" => [
+		{
+		    "link" => "/results/$club",
+			"name" => $cr->{club_name},
+		},
+	    ],
+	    "results" => $results_table,
     };
 };
 
@@ -415,6 +421,16 @@ get '/results/:club/:event/:athlete' => sub {
 	event_info => $cr,
 	athlete => $ar,
 	results => $r,
+	up => [
+	    {
+		link => "/results/$club/$event",
+		name => $cr->{event_name},
+	    },
+	    {
+		link => "/results/$club",
+		name => $cr->{club_name},
+	    },
+	    ],
     };
 };
 

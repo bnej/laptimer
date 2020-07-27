@@ -147,7 +147,6 @@ sub laps_table {
 	);
     $sth->execute( $event, $athlete );
 
-    my @r;
     my $prior_t = undef;
     my $fastest = undef;
     my $slowest = undef;
