@@ -158,6 +158,7 @@ sub laps_table {
 	if( defined $prior_t ) {
 	    $split = ms_format( $lap_t - $prior_t, 3, '+' );
 	}
+	$prior_t = $lap_t;
 	
 	my $l = {
 	    lap_n => $r->{lap},
