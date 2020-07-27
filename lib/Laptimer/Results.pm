@@ -59,7 +59,7 @@ sub finalise {
     my $event = $cr->{event_id};
 
     my $ins_rp = database->prepare(
-	"insert into result_place values ( ?, ?, ?, ?, ? )"
+	"insert into result_place values ( ?, ?, ?, ?, ?, ? )"
 	) or die database->errstr;;
     my $ins_rl = database->prepare(
 	"insert into result_lap values ( ?, ?, ?, ? )"
@@ -74,7 +74,8 @@ sub finalise {
 	    $r->{place},
 	    $r->{id},
 	    $r->{fastest_ms},
-	    $r->{total_ms}
+	    $r->{total_ms},
+	    $r->{event_laps}
 	    );
 	my $laps = $r->{laps};
 	my $i = 0;
@@ -100,6 +101,91 @@ sub flush_event {
     $del_rl->execute( $cr->{event_id} );
 
     return 1;
+}
+
+sub load_table {
+    my ($class, $cr) = @_;
+    my $club = $cr->{club_id};
+    my $event = $cr->{event_id};
+
+    my @r;
+    my $sth = database->prepare(
+	"select * from result_place join athlete using (athlete_id) where event_id = ? order by place"
+	);
+    $sth->execute( $event );
+    my $i = 0;
+    my $fastest = 0;
+    my $total_laps = $cr->{total_laps};
+    
+    while( my $r = $sth->fetchrow_hashref ) {
+	my $id = $r->{athlete_id};
+	push @r, {
+	    id => $id,
+	    url => "/results/$club/$event/$id",
+	    place => $r->{place},
+	    name => $r->{athlete_name},
+	    total_ms => $r->{total_time},
+	    total => ms_format( $r->{total_time} ),
+	    fastest_ms => $r->{best_lap},
+	    fastest => ms_format( $r->{best_lap} ),
+	    event_laps => $r->{event_laps},
+	    finished => ($r->{event_laps} >= $total_laps ? 1 : 0 ),
+	};
+    }
+    
+    return \@r;
+}
+
+sub laps_table {
+    my ($class, $cr, $athlete) = @_;
+    my $club = $cr->{club_id};
+    my $event = $cr->{event_id};
+
+    my @r;
+    my $sth = database->prepare(
+	"select * from result_lap where event_id = ? and athlete_id = ? order by lap"
+	);
+    $sth->execute( $event, $athlete );
+
+    my @r;
+    my $prior_t = undef;
+    my $fastest = undef;
+    my $slowest = undef;
+    my $total = 0;
+    while( my $r = $sth->fetchrow_hashref ) {
+	my $lap_t = $r->{lap_time};
+	$total += $lap_t;
+	my $split = '';
+	if( defined $prior_t ) {
+	    $split = ms_format( $lap_t - $prior_t, 3, '+' );
+	}
+	
+	my $l = {
+	    lap_n => $r->{lap},
+	    lap_ms => $r->{lap_time},
+	    lap => ms_format( $r->{lap_time} ),
+	    split => $split,
+	    total => ms_format( $total ),
+	    fastest => 0, # These get updated at the end
+	    slowest => 0, # These get updated at the end
+	};
+	$fastest = $l unless $fastest;
+	$slowest = $l unless $slowest;
+
+	if( $lap_t > $slowest->{lap_ms} ) {
+	    $slowest = $l;
+	}
+	if( $lap_t < $fastest->{lap_ms} ) {
+	    $fastest = $l;
+	}
+	push @r, $l;
+    }
+
+    if( $fastest && $slowest ) {
+	$fastest->{fastest} = 1;
+	$slowest->{slowest} = 1;
+    }
+    return \@r;
 }
 
 sub load_live {
@@ -157,7 +243,6 @@ sub load_live {
     foreach my $id (keys %athletes) {
 	$athletes{$id}{name} = $class->athlete($id)->{athlete_name};
     }
-
     
     my @results_table = sort { $b->{event_laps} <=> $a->{event_laps} || $a->{total} <=> $b->{total} } values %athletes;
     for( my $i = 0; $i < @results_table; $i ++ ) {

@@ -50,6 +50,7 @@ create table result_place (
     athlete_id integer references athlete (athlete_id) on delete cascade,
     best_lap integer not null,
     total_time integer not null,
+    event_laps integer not null,
     primary key (event_id, place)
 );
 
