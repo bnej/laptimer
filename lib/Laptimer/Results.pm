@@ -17,10 +17,10 @@ sub event {
     } else {
 	$r = $class->load_table( $cr );
     }
-    return $class->add_splits($r);
+    return $class->add_calculated($r);
 }
 
-sub add_splits {
+sub add_calculated {
     my ($class, $r) = @_;
 
     my $best = $r->[0];
@@ -28,6 +28,19 @@ sub add_splits {
     for( my $i = 1; $i < @$r; $i ++ ) {
 	$r->[$i]{split} = ms_format($r->[$i]{total_ms} - $best->{total_ms},3,'+');
     }
+
+    foreach my $res ( @$r ) {
+	my $ms = $res->{total_ms};
+	my $track_length = 333;
+	my $laps = $res->{event_laps};
+
+	my $total_length = $track_length * $laps;
+	
+	my $km_h = ( $total_length / 1000 ) / ( $ms / (1000 * 60 * 60) );
+	$km_h = sprintf('%0.1f', $km_h);
+	$res->{speed} = $km_h;
+    }
+    
     return $r;
 }
     
