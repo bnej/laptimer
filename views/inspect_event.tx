@@ -15,6 +15,7 @@
 	    <th scope="col"><: $h :></th>
 	    : }
 	    <th scope="col">var%</th>
+	    <th scope="col">var</th>
 	  </tr>
 	</thead>
 	<tbody>
@@ -29,9 +30,12 @@
 	    : }
 	    >
 	    : for $m.row -> $col {
-	    <td><: $col :></td>
+	    <td>
+	      <: $col :>
+	    </td>
 	    : }
 	    <td><: $m.var_pc :></td>
+	    <td><: $m.var :></td>
 	  </tr>
 	  : }
 	</tbody>

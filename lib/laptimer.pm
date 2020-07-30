@@ -210,8 +210,29 @@ get '/club/:club/:event/inspect' => sub {
 	my $ix = $a_id{$id};
 
 	my $var = $m->{lap} - $col_means[$ix];
+
 	my $var_pc = sprintf("%0.1f", abs($var / $col_means[$ix] * 100));
 	$r[$i]{var_pc} = $var_pc;
+	$r[$i]{var} = ms_format( $var, 1, '+' );
+
+	next if ! $r[$i]{active};
+	
+	# Now scan up or down to find if there is another mark closer
+	# to their average.
+	my $dir = $var > 0 ? -1 : 1; # scan direction.
+	my $j = $i;
+	my $delta = 0;
+	while( abs($delta) < abs($var)) {
+	    if( ! $r[$j]{row}[$ix + 2] ) {
+		$r[$j]{row}[$ix + 2] =
+		    '?'.ms_format( $marks->[$i]{lap} + $delta, 1 );
+	    }
+	    $j += $dir;
+	    last if $j >= scalar(@r);
+	    last if $j <= 0;
+	    $delta =  $marks->[$j]{time} - $marks->[$i]{time};
+	}
+	
     }
 
     template 'inspect_event' => {
