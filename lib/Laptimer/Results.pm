@@ -237,12 +237,19 @@ sub load_live {
 	# still calculate for marks list
 	my $lap = $time - $athletes{$id}{prior};
 	$athletes{$id}{prior} = $time;
-	push @marks, { mark => $r->{timing_number},
-		       id => $id, lap => $lap, time => $time };
-	
-	next if $athletes{$id}{finished};
 
-	if($athletes{$id}{n} >= $cr->{start_lap}) {
+	# Check if started or finished
+	my $started = $athletes{$id}{n} >= $cr->{start_lap};
+	my $finished = $athletes{$id}{finished};
+	my $active = $started && !$finished;
+	
+	push @marks, { mark => $r->{timing_number},
+		       id => $id, lap => $lap, time => $time,
+		       active => $active };
+	
+	next if $finished;
+
+	if($started) {
 	    my $event_laps = ++ $athletes{$id}{event_laps};
 	    push @{$athletes{$id}{laps}}, $lap;
 	    

@@ -177,16 +177,41 @@ get '/club/:club/:event/inspect' => sub {
 	@header[$a_id{$k}] = $a->{athlete_name};
     }
     unshift @header, "#";
+    unshift @header, "T";
     
     my @r = ( );
+    my @col_sums = (0) x $n_r;
+    my @col_counts = (0) x $n_r;
+    my @col_means = (0) x $n_r;
+    
     foreach my $m (@$marks) {
 	my $id = $m->{id};
 	my $row = [ ('') x $n_r ];
 	my $ix = $a_id{$id};
 
-	$row->[$ix] = ms_format( $m->{lap} );
+	if( $m->{active} ) {
+	    $col_sums[$ix] += $m->{lap};
+	    $col_counts[$ix] ++;
+	}
+	
+	$row->[$ix] = ms_format( $m->{lap},1 );
+	unshift @$row, ms_format( $m->{time},1 );
 	unshift @$row, $m->{mark};
-	push @r, $row;
+	push @r, { active => $m->{active}, row => $row };
+    }
+
+    for( my $i = 0; $i < scalar @col_means; $i++ ) {
+	$col_means[$i] = $col_sums[$i] / $col_counts[$i];
+    }
+
+    for( my $i = 0; $i < @r; $i ++ ) {
+	my $m = $marks->[$i];
+	my $id = $m->{id};
+	my $ix = $a_id{$id};
+
+	my $var = $m->{lap} - $col_means[$ix];
+	my $var_pc = sprintf("%0.1f", abs($var / $col_means[$ix] * 100));
+	$r[$i]{var_pc} = $var_pc;
     }
 
     template 'inspect_event' => {

@@ -25,6 +25,13 @@ sub ms_format {
     my $p_seconds = floor( $ms / 1000 ); # Whole seconds
     my $p_minutes = floor( $p_seconds / 60 ); # Whole minutes
     $p_seconds = $p_seconds % 60; # remove minutes
+
+    # Truncate milliseconds
+    if( $ms_places == 2 ) {
+	$p_ms = floor( $p_ms / 10 );
+    } elsif( $ms_places == 1 ) {
+	$p_ms = floor( $p_ms / 100 );
+    }
     
     return sprintf('%s%1d:%02d.%0'.$ms_places.'d',$prefix,$p_minutes,$p_seconds,$p_ms);
 }

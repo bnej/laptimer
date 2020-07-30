@@ -14,14 +14,24 @@
 	    : for $header -> $h {
 	    <th scope="col"><: $h :></th>
 	    : }
+	    <th scope="col">var%</th>
 	  </tr>
 	</thead>
 	<tbody>
 	  : for $marks -> $m {
-	  <tr>
-	    : for $m -> $col {
+	  <tr
+	    : if ! $m.active {
+	    class="table-dark"
+	    : } else if $m.var_pc > 10 {
+	    class="table-danger"
+	    : } else if $m.var_pc > 5 {
+	    class="table-warning"
+	    : }
+	    >
+	    : for $m.row -> $col {
 	    <td><: $col :></td>
 	    : }
+	    <td><: $m.var_pc :></td>
 	  </tr>
 	  : }
 	</tbody>
