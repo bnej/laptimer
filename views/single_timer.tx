@@ -1,0 +1,72 @@
+: cascade layouts::main
+: around title {
+  Single: <: $event_info.event_name :>
+: }
+: around js_head {
+<script src="<: $request.uri_base :>/javascripts/single_timer.js"></script>
+: }
+
+: around body {
+
+: include toolbar_app { title => "Laps: " ~ $event_info.event_name }
+  
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-6">
+      <h3 style="text-align: center;"><span id="count-marks" class="badge badge-secondary">0</span></h3>
+    </div>
+    <div class="col-6" style="text-align: right">
+      <h3><span id="lap-count" class="badge badge-success">0</span></h3>
+    </div>
+  </div>
+  
+  <div class="row break-above">
+    <div class="col-12">
+      <button type="button"
+	      class="btn btn-primary btn-lg btn-block"
+	      id="show-athletes"
+	      data-toggle="collapse"
+	      data-target="#select-riders-wrapper">
+	Select Athlete</button>
+    </div>
+  </div>
+
+  <div class="row break-above-sm collapse" id="select-riders-wrapper">
+    <form name="select-riders-form"
+	  class="select-riders-form" id="select-riders-form">
+      <div class="col-12">
+	<div id="select-riders">
+	</div>
+      </div>
+    </form>
+
+    <div class="col-12 break-above">
+      <form name="new-rider" class="new-rider-form" id="new-rider-form">
+	<div class="input-group mb-1">
+	  <div class="input-group-prepend">
+	    <span class="input-group-text">Name</span>
+	  </div>
+	  <input name="name" id="new-rider-name" type="text" class="form-control" placeholder="New Rider Name">
+	</div>
+	<button type="button"
+		class="btn btn-success btn-lg btn-block"
+		id="select-save-athletes-button"
+		onclick="new_athlete()">
+	  New Athlete
+	</button>
+      </form>
+    </div>
+  </div>
+
+
+  </div>
+  
+</div>
+
+<script>
+  var baseurl = '<: $baseurl :>';
+  var cluburl = '<: $cluburl :>';
+  load_athletes();
+  init();
+</script>
+: }
