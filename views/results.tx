@@ -15,6 +15,7 @@
 	    <th scope="col" style="width: 40px;">Place</th>
 	    <th scope="col">Rider</th>
 	    <th scope="col">Laps</th>
+	    <th scope="col">Effort</th>
 	    <th scope="col">Best Lap</th>
 	    <th scope="col">Total Time</th>
 	    <th scope="col">Av. Speed</th>
@@ -26,6 +27,7 @@
 	    <td><: $item.place :></td>
 	    <td><a href="<: $item.url :>"><: $item.name :></a></td>
 	    <td><: $item.event_laps :></td>
+	    <td><: $item.effort :></td>
 	    <td><: $item.fastest :></td>
 	    <td><: $item.total :> <span class="result-split"><: $item.split :></span></td>
 	    <td><: $item.speed :><span class="unit">km/h</span></td>

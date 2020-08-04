@@ -201,6 +201,28 @@ sub laps_table {
     return \@r;
 }
 
+sub reset_athlete {
+    my ($class, $club, $event, $id, $in) = @_;
+    
+    my $effort = 1;
+    if($in) { $effort = $in->{effort} + 1; }
+    
+    return {
+	id => $id,
+	url => "/results/$club/$event/$id",
+	laps => [ ],
+	fastest => undef,
+	total => 0,
+	event_laps => 0,
+	prior => 0,
+	name => undef,
+	finished => 0,
+	n => 0,
+	effort => $effort,
+    };
+}
+
+
 sub load_live {
     my ($class, $cr) = @_;
     my $club = $cr->{club_id};
@@ -215,23 +237,13 @@ sub load_live {
     
     $sth->execute( $event );
     my @marks = ( );
+    my @finished = ( );
 
     while( my $r = $sth->fetchrow_hashref ) {
 	my $id = $r->{athlete_id};
 	my $time = $r->{timing_mark};
 	if( !$athletes{$id} ) {
-	    $athletes{$id} = {
-		id => $id,
-		url => "/results/$club/$event/$id",
-		laps => [ ],
-		fastest => undef,
-		total => 0,
-		event_laps => 0,
-		prior => 0,
-		name => undef,
-		finished => 0,
-		n => 0,
-	    };
+	    $athletes{$id} = $class->reset_athlete( $club, $event, $id );
 	}
 
 	# still calculate for marks list
@@ -246,15 +258,15 @@ sub load_live {
 	push @marks, { mark => $r->{timing_number},
 		       id => $id, lap => $lap, time => $time,
 		       active => $active };
-	
-	next if $finished;
 
 	if($started) {
 	    my $event_laps = ++ $athletes{$id}{event_laps};
 	    push @{$athletes{$id}{laps}}, $lap;
-	    
+
+	    my $finished = 0;
 	    if( $event_laps >= $cr->{total_laps} ) {
 		$athletes{$id}{finished} = 1;
+		$finished = 1;
 	    }
 	    $athletes{$id}{total} += $lap;
 	    if(defined $athletes{$id}{fastest}) {
@@ -262,14 +274,29 @@ sub load_live {
 	    } else {
 		$athletes{$id}{fastest} = $lap; # First lap in event
 	    }
+
+	    if( $finished ) {
+		push @finished, $athletes{$id};
+		$started = 0;
+		$finished = 0;
+		$athletes{$id} = $class->reset_athlete( $club, $event, $id,
+							$athletes{$id});
+
+		# DO NOT re-count that mark
+		$athletes{$id}{n} = -1;
+	    }
 	}
 	$athletes{$id}{n} ++;
+    }
+    foreach my $f (@finished) {
+	$f->{name} = $class->athlete($f->{id})->{athlete_name};
     }
     foreach my $id (keys %athletes) {
 	$athletes{$id}{name} = $class->athlete($id)->{athlete_name};
     }
     
-    my @results_table = sort { $b->{event_laps} <=> $a->{event_laps} || $a->{total} <=> $b->{total} } values %athletes;
+    my @results_table = sort { $b->{event_laps} <=> $a->{event_laps} || $a->{total} <=> $b->{total} } @finished;
+    
     for( my $i = 0; $i < @results_table; $i ++ ) {
 	if( $results_table[$i]{finished} ) {
 	    $results_table[$i]{place} = $i + 1;

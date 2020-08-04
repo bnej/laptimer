@@ -22,6 +22,21 @@ create table event (
     primary key (event_id)
 );
 
+create table event_type (
+    event_type_id varchar(10) not null,
+    event_type_name varchar not null,
+    start_lap integer,
+    total_laps integer,
+    lap_length float,
+    repeat boolean default false,
+    primary key (event_type_id)
+);
+insert into event_type values ('4kp_t','4km Individual Pursuit Tempe',1,12,333.3,false);
+insert into event_type values ('f200_t','Flying 200 Tempe',1,1,200,true);
+insert into event_type values ('kilo_t','Kilo Tempe',1,3,333.3,true);
+
+alter table event add event_type_id varchar(10) references event_type;
+
 create table athlete (
     club_id varchar(10) references club(club_id) on delete cascade,
     athlete_id serial not null,
@@ -48,10 +63,11 @@ create table result_place (
     event_id integer references event (event_id) on delete cascade,
     place integer not null,
     athlete_id integer references athlete (athlete_id) on delete cascade,
+    effort integer not null,
     best_lap integer not null,
     total_time integer not null,
     event_laps integer not null,
-    primary key (event_id, place)
+    primary key (event_id, place, effort)
 );
 
 create index result_place_athlete_idx on result_place (athlete_id);
@@ -59,9 +75,10 @@ create index result_place_athlete_idx on result_place (athlete_id);
 create table result_lap (
     event_id integer references event (event_id) on delete cascade,
     athlete_id integer references athlete (athlete_id) on delete cascade,
+    effort integer not null,
     lap integer not null,
     lap_time integer not null,
-    primary key (event_id, athlete_id, lap)
+    primary key (event_id, athlete_id, effort, lap)
 );
 
 create index result_lap_event_idx on result_lap (event_id);
