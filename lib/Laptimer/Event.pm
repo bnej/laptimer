@@ -12,6 +12,8 @@ my @keys = qw(
     event_id event_type_id club_id club_name event_name event_type_name
     event_text start_lap total_laps repeat lap_length event_active
     );
+
+my $sel = "select event_id, event_type_id, club_id, club_name, event_name, event_type_name, event_text, coalesce(event.start_lap, event_type.start_lap) as start_lap, coalesce(event.total_laps, event_type.total_laps) as total_laps, repeat, lap_length, event_active from club join event using (club_id) left join event_type using (event_type_id)";
     
 sub load {
     my $class = shift;
@@ -19,7 +21,7 @@ sub load {
     my $event = shift;
     
     my $sth = database->prepare(
-	"select event_id, event_type_id, club_id, club_name, event_name, event_type_name, event_text, coalesce(event.start_lap, event_type.start_lap) as start_lap, coalesce(event.total_laps, event_type.total_laps) as total_laps, repeat, lap_length, event_active from club join event using (club_id) left join event_type using (event_type_id) where club_id = ? and event_id = ?;"
+	"$sel where club_id = ? and event_id = ?;"
 	) or die database->errstr;
     $sth->execute( $club, $event ) or die $sth->errstr;
 
@@ -30,6 +32,22 @@ sub load {
     } else {
 	return undef;
     }
+}
+
+sub load_club {
+    my $class = shift;
+    my $club = shift;
+    
+    my $sth = database->prepare(
+	"$sel where club_id = ?"
+	) or die database->errstr;
+    $sth->execute( $club ) or die $sth->errstr;
+
+    my @r = ( );
+    while( my $r = $sth->fetchrow_hashref ) {
+	push @r, bless( $r, $class );
+    }
+    return \@r;
 }
 
 sub TO_JSON {

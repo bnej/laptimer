@@ -106,7 +106,7 @@ get '/club/:club' => sub {
 	"select * from event where club_id = ? and event_active order by event_id"
 	) or die database->errstr;
     $sth->execute($club) or die $sth->errstr;
-    
+
     my @r = ( );
     while( my $r = $sth->fetchrow_hashref ) {
 	my $id = $r->{event_id};
@@ -118,29 +118,47 @@ get '/club/:club' => sub {
 	push @r, $r;
     }
 
+    my $et_sth = database->prepare(
+	"select * from event_type"
+	) or die database->errstr;
+    $et_sth->execute or die database->errstr;
+    
+    my @et = ( );
+    while( my $r = $et_sth->fetchrow_hashref ) {
+	push @et, $r;
+    }
+
     template 'list_events', {
 	club => $cr,
 	cluburl => "/club/$club",
 	events => \@r,
 	error => $error,
+	event_types => \@et,
     };
 };
 
 post '/club/:club/new_event' => sub {
     my $club = params->{club};
-    my $event_name = params->{event_name};
-    my $event_start = params->{event_start};
-    my $total_laps = params->{total_laps};
+    my $event_type = params->{event_type};
 
-    unless( $event_name && $event_start && $total_laps ) {
+    unless( $event_type ) {
 	return redirect "/club/$club?error=missing_field";
     }
 
+    my $et_sth = database->prepare("select * from event_type where event_type_id = ?");
+    $et_sth->execute($event_type);
+    my $et = $et_sth->fetchrow_hashref;
+
+    my $event_name = $et->{event_type_name};
+    my $event_start = $et->{start_lap};
+    my $total_laps = $et->{total_laps};
+
     my $sth = database->prepare(
-	"insert into event (club_id, event_name, start_lap, total_laps, event_active) values (?,?,?,?,true) returning event_id"
+	"insert into event (club_id, event_name, start_lap, total_laps, event_active, event_type_id, event_date) values (?,?,?,?,true,?,current_date) returning event_id"
 	) or die database->errstr;
     
-    my $inserted = $sth->execute($club, $event_name, $event_start, $total_laps) or die $sth->errstr;
+    my $inserted = $sth->execute($club, $event_name, $event_start, $total_laps, $event_type) or die $sth->errstr;
+    
     if($inserted) {
 	my $r = $sth->fetchrow_hashref;
 	my $event_id = $r->{event_id};
@@ -389,14 +407,12 @@ get '/club/:club/:event/single_timer' => sub {
     my $club = params->{club};
     my $event = params->{event};
     
-    my $sth = database->prepare(
-	"select * from club join event using (club_id) where club_id = ? and event_id = ?"
-	);
-    $sth->execute($club, $event);
-    my $cr = $sth->fetchrow_hashref();
-    template 'single_timer', { "event_info" => $cr,
-			    "cluburl" => "/club/$club",
-			    "baseurl" => "/club/$club/$event" };
+    my $cr = Laptimer::Event->load( $club, $event );
+    template 'single_timer', {
+	"event_info" => $cr,
+	    "cluburl" => "/club/$club",
+	    "baseurl" => "/club/$club/$event"
+    };
 };
 
 get '/club/:club/:event/lap' => sub {
