@@ -9,6 +9,7 @@ use Dancer::Exception qw(:all);
 use Crypt::SaltedHash;
 
 use Laptimer::Results;
+use Laptimer::Event;
 use Laptimer::Util qw(:all);
 
 our $VERSION = '0.1';
@@ -153,11 +154,7 @@ get '/club/:club/:event/inspect' => sub {
     my $club = params->{club};
     my $event = params->{event};
 
-    my $sth = database->prepare(
-	"select * from club join event using (club_id) where club_id = ? and event_id = ?"
-	);
-    $sth->execute($club, $event);
-    my $cr = $sth->fetchrow_hashref();
+    my $cr = Laptimer::Event->load( $club, $event );
 
     my ($results, $marks) = Laptimer::Results->load_live( $cr );
     my $j = 0;
@@ -442,11 +439,7 @@ post '/club/:club/:event/finalise' => sub {
     my $club = params->{club};
     my $event = params->{event};
 
-    my $sth = database->prepare(
-	"select * from club join event using (club_id) where club_id = ? and event_id = ?"
-	);
-    $sth->execute($club, $event);
-    my $cr = $sth->fetchrow_hashref();
+    my $cr = Laptimer::Event->load( $club, $event );
     Laptimer::Results->finalise( $cr );
 
     redirect "/club/$club";
@@ -484,12 +477,7 @@ get '/results/:club/:event' => sub {
     my $club = params->{club};
     my $event = params->{event};
 
-    my $sth_club = database->prepare(
-	"select * from club join event using (club_id) where club_id = ? and event_id = ?"
-	);
-    $sth_club->execute($club, $event);
-    my $cr = $sth_club->fetchrow_hashref();
-
+    my $cr = Laptimer::Event->load( $club, $event );
     my $results_table = Laptimer::Results->event( $cr );
     
     template 'results', {
@@ -511,18 +499,13 @@ get '/results/:club/:event/:athlete' => sub {
     my $event = params->{event};
     my $athlete = params->{athlete};
 
-    my $sth_club = database->prepare(
-	"select * from club join event using (club_id) where club_id = ? and event_id = ?"
-	);
-    $sth_club->execute($club, $event);
-    my $cr = $sth_club->fetchrow_hashref();
-
     my $sth_a = database->prepare(
 	'select * from athlete where athlete_id = ?'
 	) or die database->errstr;
     $sth_a->execute($athlete);
     my $ar = $sth_a->fetchrow_hashref;
 
+    my $cr = Laptimer::Event->load( $club, $event );
     my $r = Laptimer::Results->laps( $cr, $athlete );
 	    
     template 'results_athlete', {

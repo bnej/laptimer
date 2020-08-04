@@ -17,11 +17,11 @@ sub event {
     } else {
 	$r = $class->load_table( $cr );
     }
-    return $class->add_calculated($r);
+    return $class->add_calculated( $cr, $r);
 }
 
 sub add_calculated {
-    my ($class, $r) = @_;
+    my ($class, $cr, $r) = @_;
 
     my $best = $r->[0];
     $best->{split} = '';
@@ -31,7 +31,7 @@ sub add_calculated {
 
     foreach my $res ( @$r ) {
 	my $ms = $res->{total_ms};
-	my $track_length = 333;
+	my $track_length = $cr->lap_length || 333.3;
 	my $laps = $res->{event_laps};
 
 	my $total_length = $track_length * $laps;
