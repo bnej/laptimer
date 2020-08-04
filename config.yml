@@ -19,6 +19,10 @@ engines:
     extension: tx                     # Dancer's default template extension is "tt"
     module:
       - Text::Xslate::Bridge::TT2Like # to keep partial compatibility with Template Toolkit
+  JSON:
+    allow_blessed: 1
+    canonical: 1
+    convert_blessed: 1
 
 serializer: JSON
 

@@ -8,6 +8,11 @@ use Dancer::Plugin::Database;
 use Dancer::Exception qw(:all);
 use Laptimer::Util qw(:all);
 
+my @keys = qw(
+    event_id event_type_id club_id club_name event_name event_type_name
+    event_text start_lap total_laps repeat lap_length event_active
+    );
+    
 sub load {
     my $class = shift;
     my $club = shift;
@@ -25,6 +30,15 @@ sub load {
     } else {
 	return undef;
     }
+}
+
+sub TO_JSON {
+    my $self = shift;
+    my $r = { };
+    foreach my $key ( @keys ) {
+	$r->{$key} = $self->$key;
+    }
+    return $r;
 }
 
 sub event_id { return $_[0]->{event_id}; }

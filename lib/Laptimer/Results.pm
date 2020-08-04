@@ -72,29 +72,35 @@ sub finalise {
     my $event = $cr->{event_id};
 
     my $ins_rp = database->prepare(
-	"insert into result_place values ( ?, ?, ?, ?, ?, ? )"
+	"insert into result_place values ( ?, ?, ?, ?, ?, ?, ? )"
 	) or die database->errstr;;
     my $ins_rl = database->prepare(
-	"insert into result_lap values ( ?, ?, ?, ? )"
+	"insert into result_lap values ( ?, ?, ?, ?, ? )"
 	) or die database->errstr;
     my $upd_f = database->prepare(
 	"update event set event_active = ? where event_id = ?"
 	) or die database->errstr;
     
     foreach my $r ( @$results ) {
+	warning( $r->{effort} );
+	warning( $r->{fastest_ms} );
+	warning( $r->{total_ms} );
 	$ins_rp->execute(
 	    $event,
 	    $r->{place},
 	    $r->{id},
+	    $r->{effort},
 	    $r->{fastest_ms},
 	    $r->{total_ms},
 	    $r->{event_laps}
-	    );
+	    ) or die $ins_rp->errstr;
 	my $laps = $r->{laps};
 	my $i = 0;
 	foreach my $l ( @$laps ) {
 	    $i++;
-	    $ins_rl->execute( $event, $r->{id}, $i, $l ) or die $ins_rl->errstr;
+	    $ins_rl->execute( $event,
+			      $r->{id}, $r->{effort},
+			      $i, $l ) or die $ins_rl->errstr;
 	}
     }
     $upd_f->execute( 0, $event ); # Mark completed
@@ -139,6 +145,7 @@ sub load_table {
 	    name => $r->{athlete_name},
 	    total_ms => $r->{total_time},
 	    total => ms_format( $r->{total_time} ),
+	    effort => $r->{effort},
 	    fastest_ms => $r->{best_lap},
 	    fastest => ms_format( $r->{best_lap} ),
 	    event_laps => $r->{event_laps},
@@ -217,6 +224,7 @@ sub reset_athlete {
 	prior => 0,
 	name => undef,
 	finished => 0,
+	saved => 0,
 	n => 0,
 	effort => $effort,
     };
@@ -258,7 +266,6 @@ sub load_live {
 	push @marks, { mark => $r->{timing_number},
 		       id => $id, lap => $lap, time => $time,
 		       active => $active };
-
 	if($started) {
 	    my $event_laps = ++ $athletes{$id}{event_laps};
 	    push @{$athletes{$id}{laps}}, $lap;
@@ -276,18 +283,38 @@ sub load_live {
 	    }
 
 	    if( $finished ) {
-		push @finished, $athletes{$id};
-		$started = 0;
-		$finished = 0;
-		$athletes{$id} = $class->reset_athlete( $club, $event, $id,
-							$athletes{$id});
 
-		# DO NOT re-count that mark
-		$athletes{$id}{n} = -1;
+		# For non-repeating events, don't push the result on
+		# more than once.
+		if( ! $athletes{$id}{saved} ) {
+		    push @finished, $athletes{$id};
+		    $athletes{$id}{saved} = 1;
+		}
+
+		# If "repeat" is not true, any remaining marks are blank.
+		if( $cr->repeat ) {
+		    $started = 0;
+		    $finished = 0;
+		    $athletes{$id} = $class->reset_athlete( $club, $event, $id,
+							    $athletes{$id});
+		    
+		    # DO NOT re-count that mark.
+		    next;
+		}
 	    }
 	}
 	$athletes{$id}{n} ++;
     }
+
+    foreach my $ar ( values %athletes ) {
+	# If they are finished, the result is already in, this is to
+	# add any DNFs or to show race-in-progress.
+	if( $ar->{started} && !$ar->{finished} ) {
+	    warning( "oops" );
+	    push @finished, $ar;
+	}
+    }
+    
     foreach my $f (@finished) {
 	$f->{name} = $class->athlete($f->{id})->{athlete_name};
     }
@@ -303,6 +330,7 @@ sub load_live {
 	} else {
 	    $results_table[$i]{place} = ($i + 1)."*";
 	}
+	warning( $results_table[$i]{fastest} );
 	$results_table[$i]{fastest_ms} = $results_table[$i]{fastest}; # save
 	$results_table[$i]{fastest} = ms_format($results_table[$i]{fastest});
 	
