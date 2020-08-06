@@ -54,10 +54,17 @@ function athlete_select( ) {
     var id = parseInt(this.getAttribute("value"));
     var athlete = athletes[id];
 
-    alert( athlete.name );
+    $('#timer-current').text(ms_format(0,1));
+    $('#athlete-name').text(athlete.name);
+    $('#start-stop-mark').
+	text('Go').
+	removeClass('btn-warning btn-success btn-error btn-primary').
+	addClass('btn-success');
+    $('#lap-count').text( remaining(0) );
+    $('#count-marks').text( 0 );
+
     return false;
 }
-
 
 function init( ) {
     $.ajax({

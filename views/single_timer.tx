@@ -13,13 +13,35 @@
 <div class="container-fluid">
   <div class="row">
     <div class="col-6">
-      <h3 style="text-align: center;"><span id="count-marks" class="badge badge-secondary">0</span></h3>
+      <h3><span id="count-marks" class="badge badge-secondary">0</span></h3>
     </div>
     <div class="col-6" style="text-align: right">
       <h3><span id="lap-count" class="badge badge-success">0</span></h3>
     </div>
   </div>
   
+  <h2 id="athlete-name" style="text-align: center"> </h2>
+  <div class="row">
+    <div class="col-md-3">
+    </div>
+    <div class="col-md-6" id="timer-current">
+      00:00.0
+    </div>
+    <div class="col-md-3">
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <button type="button"
+	      class="btn btn-warning btn-xl btn-block"
+	      id="start-stop-mark"
+	      onclick="mark_lap($('#start-stop-mark'));">
+	Not Ready
+      </button>
+    </div>
+  </div>
+
   <div class="row break-above">
     <div class="col-12">
       <button type="button"

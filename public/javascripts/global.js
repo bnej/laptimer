@@ -50,3 +50,10 @@ function new_athlete( ) {
     });
 }
 
+function remaining( mark_number ) {
+    var r = 'N';
+    if( mark_number >= start_lap ) {
+	r = total_laps - ( mark_number - start_lap );
+    }
+    return r
+}

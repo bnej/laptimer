@@ -120,14 +120,6 @@ function select_save_athletes( ) {
     }
 }
 
-function remaining( mark_number ) {
-    var r = 'N';
-    if( mark_number >= start_lap ) {
-	r = total_laps - ( mark_number - start_lap );
-    }
-    return r
-}
-
 function athlete_lap( ) {
     var id = parseInt(this.getAttribute("data-id"));
     var athlete = athletes[id];
