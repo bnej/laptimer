@@ -309,7 +309,7 @@ sub load_live {
     foreach my $ar ( values %athletes ) {
 	# If they are finished, the result is already in, this is to
 	# add any DNFs or to show race-in-progress.
-	if( $ar->{started} && !$ar->{finished} ) {
+	if( $ar->{n} >= $cr->{start_lap} && !$ar->{finished} ) {
 	    warning( "oops" );
 	    push @finished, $ar;
 	}

@@ -27,3 +27,26 @@ function ms_format( ms, ms_places = 3 ) {
 	return "" + zero_pad( p_minutes, 2 ) + ":" + zero_pad( p_seconds, 2 ) + "." + zero_pad(p_ms, ms_places);
     }
 }
+
+function new_athlete( ) {
+    var formdata = $('#new-rider-form').serialize();
+    if($('#new-rider-name').val() == "") {
+	$('#new-rider-form').prepend(
+	    '<div class="alert alert-warning alert-dismissable fade show" role="alert">'+
+		"<span>You need to fill in a name</span>" +
+		'<button type="button" class="close" data-dismiss="alert" aria-label="Close">'+
+		'<span aria-hidden="true">&times;</span>'+
+		'</button>'+
+		'</div>'
+	);
+	return;
+    }
+    
+    $.ajax({
+	type: 'POST',
+	url: cluburl + "/athletes",
+	data: formdata,
+	success: load_athletes_update,
+    });
+}
+

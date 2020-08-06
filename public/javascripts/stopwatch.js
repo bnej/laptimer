@@ -44,14 +44,14 @@ var to_sync = [ ];
 
 function fix_marks( data ) {
     data.forEach( function(v) {
-	var elts = $("#row-mark-"+v.mark_number);
+	var elts = $("#row-mark-"+v.timing_number);
 	if( v.sync == 0 ) {
 	    elts.removeClass("table-warning").addClass("table-info");
 	    elts.find(".time-mark").text(ms_format(v.mark));
 	} else {
 	    elts.removeClass("table-warning").addClass("table-success");
 	}
-	timer_marks[v.mark_number].sync = true;
+	timer_marks[v.timing_number].sync = true;
     });
     to_sync = to_sync.filter( function( value, index, arr ) { !value.sync } );
 }
@@ -61,7 +61,7 @@ function mark() {
     var delta = current - timer_start;
     var delta_fmt = ms_format( delta );
     var mark = {
-	mark_number: num,
+	timing_number: num,
 	mark: delta,
 	mark_fmt: delta_fmt,
 	timestamp: current,
@@ -81,8 +81,8 @@ update_time();
 function add_mark( timer_marks ) {
     $.ajax({
 	type: 'POST',
-	url: baseurl + "/timing",
-	data: JSON.stringify({ timing: timer_marks }),
+	url: baseurl + "/lap_data",
+	data: JSON.stringify({ marks: timer_marks }),
 	contentType: "application/json",
 	success: fix_marks,
 	dataType: "json"
@@ -100,15 +100,15 @@ function load_marks( ) {
 
 function load_marks_update( data ) {
     data.forEach( function(v) {
-	num = v.mark_number + 1;
+	num = v.timing_number + 1;
 	var mark = {
-	    mark_number: v.mark_number,
+	    timing_number: v.timing_number,
 	    mark: v.mark,
 	    mark_fmt: ms_format(v.mark),
 	    sync: true,
 	};
-	timer_marks[ v.mark_number ] = mark;
+	timer_marks[ v.timing_number ] = mark;
 
-	$('#mark-table > tbody').prepend('<tr class="table-success" id="row-mark-'+v.mark_number+'"><th class="time-number" scope="row">'+v.mark_number+'</th><td class="time-mark">'+mark.mark_fmt+'</tr>');
+	$('#mark-table > tbody').prepend('<tr class="table-success" id="row-mark-'+v.timing_number+'"><th class="time-number" scope="row">'+v.timing_number+'</th><td class="time-mark">'+mark.mark_fmt+'</tr>');
     });
 }

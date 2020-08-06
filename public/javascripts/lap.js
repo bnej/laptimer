@@ -71,28 +71,6 @@ function load_athletes_update( data ) {
     });
 }
 
-function new_athlete( ) {
-    var formdata = $('#new-rider-form').serialize();
-    if($('#new-rider-name').val() == "") {
-	$('#new-rider-form').prepend(
-	    '<div class="alert alert-warning alert-dismissable fade show" role="alert">'+
-		"<span>You need to fill in a name</span>" +
-		'<button type="button" class="close" data-dismiss="alert" aria-label="Close">'+
-		'<span aria-hidden="true">&times;</span>'+
-		'</button>'+
-		'</div>'
-	);
-	return;
-    }
-    
-    $.ajax({
-	type: 'POST',
-	url: cluburl + "/athletes",
-	data: formdata,
-	success: load_athletes_update,
-    });
-}
-
 function select_save_athletes( ) {
     var all = $('#select-riders-form').serializeArray();
     var selected = [ ];
@@ -186,7 +164,7 @@ function sync_laps( lap_marks ) {
     $.ajax({
 	type: 'POST',
 	url: baseurl + "/lap_data",
-	data: JSON.stringify({ laps: lap_marks }),
+	data: JSON.stringify({ marks: lap_marks }),
 	contentType: "application/json",
 	success: fix_laps,
 	dataType: "json"

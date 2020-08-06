@@ -21,6 +21,44 @@ function load_athletes( ) {
     });
 }
 
+function load_athletes_update( data ) {
+    var sr = $('#select-riders');
+    sr.html(""); /* clear before populating */
+    $("#new-rider-form input").val("");
+    
+    data.forEach( function(v) {
+	var athlete = {
+	    id: v.id,
+	    name: v.name,
+	    alias: v.alias,
+	};
+	athletes[ v.id ] = athlete;
+	lap[ v.id ] = 0;
+
+	sr.append(
+	    '<div class="input-group mb-1" id="select-athlete-'+v.id+'">'+
+		'<div class="input-group-prepend">'+
+		'<span class="input-group-text">'+v.name+'</span>'+
+		'</div>'+
+		'<button name="choose-athlete" value="'+v.id+'" type="text" class="btn-primary athlete-select">Select</button>'+
+		'</div>'
+	);
+    });
+
+    $('.athlete-select').each( function(index) {
+	$(this).on( "click", athlete_select );
+    });
+}
+
+function athlete_select( ) {
+    var id = parseInt(this.getAttribute("value"));
+    var athlete = athletes[id];
+
+    alert( athlete.name );
+    return false;
+}
+
+
 function init( ) {
     $.ajax({
 	type: 'GET',
@@ -28,4 +66,9 @@ function init( ) {
 	success: init_update,
 	datatype: "json"
     });
+}
+
+function init_update( data ) {
+    start_lap = data.start_lap;
+    total_laps = data.total_laps;
 }
