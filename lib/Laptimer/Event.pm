@@ -86,6 +86,14 @@ sub TO_JSON {
     return $r;
 }
 
+sub url {
+    my ($self) = @_;
+    my $club_id = $self->club_id;
+    my $event_id = $self->event_id;
+
+    return "/club/$club_id/$event_id";
+}
+    
 sub event_id { return $_[0]->{event_id}; }
 sub event_type_id { return $_[0]->{event_type_id}; }
 sub club_id { return $_[0]->{club_id}; }

@@ -26,7 +26,6 @@
 	<tr>
 	  <th scope="col">Event</th>
 	  <th scope="col">Date</th>
-	  <th scope="col">Links</th>
 	</tr>
       </thead>
       <tbody>
@@ -36,16 +35,8 @@
 	class="table-success"
 	: }
 	>
-	<td><: $event.event_name :></td>
+	<td><a href="<: $event.url :>"><: $event.event_name :></a></td>
 	<td><: $event.event_date :></td>
-	  <td>
-	    <a 
-	       href="<: $event.url :>/stopwatch">Stopwatch</a>
-	    | <a 
-		href="<: $event.url :>/lap">Laps</a>
-	    | <a
-		href="<: $event.url :>/single_timer">Single Timer</a>
-	  </td>
 	</tr>
 	: }
 	: else {

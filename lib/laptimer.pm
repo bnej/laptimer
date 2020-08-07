@@ -406,6 +406,19 @@ post '/club/:club/:event/finalise' => sub {
     redirect "/club/$club";
 };
 
+get '/club/:club/:event' => sub {
+    my $club = params->{club};
+    my $event = params->{event};
+
+    my $cr = Laptimer::Event->load_event( $club, $event );
+
+    template 'event', {
+	"event_info" => $cr,
+	"baseurl" => "/club/$club/$event",
+        "cluburl" => "/club/$club",
+    };
+};
+
 get '/results/:club' => sub {
     my $club = params->{club};
     
