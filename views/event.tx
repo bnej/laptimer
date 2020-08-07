@@ -1,0 +1,51 @@
+: cascade layouts::main
+: around title {
+  <: $event_info.club_name :> - <: $event_info.event_name :>
+: }
+: around body {
+: include toolbar { title => $event_info.club_name ~ ' - ' ~ $event_info.event_name }
+
+<div class="container-fluid">
+  <div class="row break-above">
+    <div class="col-12">
+
+      <h3>Two Person Timing</h3>
+      <p>
+	One person operates the stopwatch and marks each time a rider
+	passes the lap line. A second person taps rider's names in the
+	order they crossed the line.
+      </p>
+      <p>
+	Use once only per event, for multiple rider individual pursuits.
+      </p>
+      
+      <ul class="list_group">
+	<li class="list-group-item">
+	  <a href="<: $event_info.url :>/stopwatch">Stopwatch</a>
+	</li>
+	<li class="list-group-item">
+	  <a href="<: $event_info.url :>/lap">Lap Counter</a>
+	</li>
+      </ul>
+      
+      <h3>Single Person Timing</h3>
+      <p>
+	A single rider is timed at once. For multiple lap events, one
+	press at start, then one for each lap. Remaining laps shown in
+	the top right.
+      </p>
+      <p>
+	Can be used multiple times per rider and re-opened in the same
+	event more than once even on a different device.
+      </p>
+      <ul class="list_group">
+	<li class="list-group-item">
+	  <a href="<: $event_info.url :>/single_timer">Individual Timer</a>
+	</li>
+      </ul>
+      
+    </div>
+  </div>
+</div>
+
+: }
