@@ -153,14 +153,16 @@ function athlete_lap( ) {
 }
 
 function sync_laps( lap_marks ) {
-    $.ajax({
-	type: 'POST',
-	url: baseurl + "/lap_data",
-	data: JSON.stringify({ marks: lap_marks }),
-	contentType: "application/json",
-	success: fix_laps,
-	dataType: "json"
-    });
+    if( lap_marks.length > 0 ) {
+	$.ajax({
+	    type: 'POST',
+	    url: baseurl + "/lap_data",
+	    data: JSON.stringify({ marks: lap_marks }),
+	    contentType: "application/json",
+	    success: fix_laps,
+	    dataType: "json"
+	});
+    }
 }
 
 function fix_laps( data ) {

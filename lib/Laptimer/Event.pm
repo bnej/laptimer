@@ -15,7 +15,7 @@ my @keys = qw(
 
 my $sel = "select event_id, event_type_id, club_id, club_name, event_name, event_type_name, event_text, coalesce(event.start_lap, event_type.start_lap) as start_lap, coalesce(event.total_laps, event_type.total_laps) as total_laps, repeat, lap_length, event_active from club join event using (club_id) left join event_type using (event_type_id)";
     
-sub load {
+sub load_event {
     my $class = shift;
     my $club = shift;
     my $event = shift;
@@ -50,12 +50,39 @@ sub load_club {
     return \@r;
 }
 
+sub marks {
+    my $self = shift;
+    my $event_id = $self->event_id;
+
+    my $sth = database->prepare(
+	"select * from time_mark full outer join place_mark ".
+	"using (event_id, timing_number) where event_id = ? ".
+	"order by timing_number"
+	);
+    $sth->execute( $event_id );
+
+    my @r;
+    while( my $row = $sth->fetchrow_hashref ) {
+	push @r, {
+	    mark => $row->{timing_mark},
+	    timing_number => $row->{timing_number},
+	    mark_fmt => ms_format( $row->{timing_mark} ),
+	    sync => 1,
+	    timestamp => $row->{timestamp},
+	};
+    }
+    return \@r;
+}
+
 sub TO_JSON {
     my $self = shift;
     my $r = { };
     foreach my $key ( @keys ) {
 	$r->{$key} = $self->$key;
     }
+    $r->{marks} = $self->marks;
+    $r->{last_mark} = $r->{marks}[-1]{timing_number};
+    $r->{last_offset} = $r->{marks}[-1]{mark};
     return $r;
 }
 

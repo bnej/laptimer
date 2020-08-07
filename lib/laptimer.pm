@@ -174,7 +174,7 @@ get '/club/:club/:event/inspect' => sub {
     my $club = params->{club};
     my $event = params->{event};
 
-    my $cr = Laptimer::Event->load( $club, $event );
+    my $cr = Laptimer::Event->load_event( $club, $event );
 
     my ($results, $marks) = Laptimer::Results->load_live( $cr );
     my $j = 0;
@@ -304,7 +304,7 @@ get '/club/:club/:event/info' => sub {
     my $club = params->{club};
     my $event = params->{event};
 
-    my $cr = Laptimer::Event->load( $club, $event );
+    my $cr = Laptimer::Event->load_event( $club, $event );
 
     return $cr;
 };
@@ -356,7 +356,7 @@ get '/club/:club/:event/single_timer' => sub {
     my $club = params->{club};
     my $event = params->{event};
     
-    my $cr = Laptimer::Event->load( $club, $event );
+    my $cr = Laptimer::Event->load_event( $club, $event );
     template 'single_timer', {
 	"event_info" => $cr,
 	    "cluburl" => "/club/$club",
@@ -400,7 +400,7 @@ post '/club/:club/:event/finalise' => sub {
     my $club = params->{club};
     my $event = params->{event};
 
-    my $cr = Laptimer::Event->load( $club, $event );
+    my $cr = Laptimer::Event->load_event( $club, $event );
     Laptimer::Results->finalise( $cr );
 
     redirect "/club/$club";
@@ -438,7 +438,7 @@ get '/results/:club/:event' => sub {
     my $club = params->{club};
     my $event = params->{event};
 
-    my $cr = Laptimer::Event->load( $club, $event );
+    my $cr = Laptimer::Event->load_event( $club, $event );
     my $results_table = Laptimer::Results->event( $cr );
     
     template 'results', {
@@ -466,7 +466,7 @@ get '/results/:club/:event/:athlete' => sub {
     $sth_a->execute($athlete);
     my $ar = $sth_a->fetchrow_hashref;
 
-    my $cr = Laptimer::Event->load( $club, $event );
+    my $cr = Laptimer::Event->load_event( $club, $event );
     my $r = Laptimer::Results->laps( $cr, $athlete );
 	    
     template 'results_athlete', {

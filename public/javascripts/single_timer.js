@@ -90,12 +90,10 @@ function update_state( ) {
     var mark_btn = $('#start-stop-mark').
 	removeClass('btn-warning btn-success btn-error btn-primary');
 
-    /* Start the timer if this is the active lap */
-    if( effort_mark == start_lap ) {
-	start_timer( );
-    }
-    
-    if( effort_mark < start_lap - 1 ) {
+    if( !athlete_sel ) {
+	mark_btn.addClass('btn-warning').
+	    text("Not Ready");
+    } else if( effort_mark < start_lap - 1 ) {
 	/* Idle lap */
 	mark_btn.addClass('btn-primary').
 	    text('Next');
@@ -117,21 +115,65 @@ function update_state( ) {
 	    text('Lap');
     }
     $('#count-marks').text( mark_number - 1 );
+    $('#sync-marks').text( to_sync.length );
     $('#lap-count').text( remaining( effort_mark ) );
 }
 
 function mark_lap( ) {
     /* Disable if an athlete is not selected. */
     if( !athlete_sel ) return;
-    
+
+    var current = Date.now();
+    var delta = current - timer_start;
+    var delta_fmt = ms_format( delta );
+    var place_mark = {
+	"id": athlete_sel.id,
+	"timing_number": mark_number,
+	"mark": delta,
+	"mark_fmt": delta_fmt,
+	"sync":false,
+	"timestamp":current
+    };
+    marks[mark_number] = place_mark;
+    to_sync.push( place_mark );
+
     if( !effort_finished() ) {
 	/* Don't record a mark if we aren't running. */
 	mark_number ++;
 	effort_mark ++;
     }
 
+    /* Start the timer if this is the active lap */
+    if( effort_mark == start_lap ) {
+	start_timer( );
+    }
+    
     update_state( );
+    sync_laps( to_sync );
 }
+
+function sync_laps( lap_marks ) {
+    if( lap_marks.length > 0 ) {
+	$.ajax({
+	    type: 'POST',
+	    url: baseurl + "/lap_data",
+	    data: JSON.stringify({ marks: lap_marks }),
+	    contentType: "application/json",
+	    success: fix_laps,
+	    dataType: "json"
+	});
+    }
+}
+
+function fix_laps( data ) {
+    data.forEach( function(v) {
+	marks[v.timing_number].sync = true;
+    });
+    
+    to_sync = to_sync.filter( function( value, index, arr ) { !value.sync } );
+    update_state();
+}
+
 
 function athlete_select( ) {
     var id = parseInt(this.getAttribute("value"));
@@ -157,4 +199,10 @@ function init( ) {
 function init_update( data ) {
     start_lap = data.start_lap;
     total_laps = data.total_laps;
+
+    marks = data.marks;
+    timer_start = Date.now() - data.last_offset;
+    mark_number = data.last_mark + 1;
+
+    update_state();
 }
