@@ -24,8 +24,8 @@
     <table class="table" id="event-table">
       <thead class="thead-light">
 	<tr>
-	  <th scope="col">Event</th>
 	  <th scope="col">Date</th>
+	  <th scope="col">Event</th>
 	</tr>
       </thead>
       <tbody>
@@ -35,8 +35,8 @@
 	class="table-success"
 	: }
 	>
+	<td><: $event.date_fmt :></td>
 	<td><a href="<: $event.url :>"><: $event.event_name :></a></td>
-	<td><: $event.event_date :></td>
 	</tr>
 	: }
 	: else {

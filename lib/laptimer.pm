@@ -104,20 +104,13 @@ get '/club/:club' => sub {
     my $cr = $sth->fetchrow_hashref;
     $cr->{url} = "/club/$club";
     
-    $sth = database->prepare(
-	"select * from event where club_id = ? and event_active order by event_id"
-	) or die database->errstr;
-    $sth->execute($club) or die $sth->errstr;
-
-    my @r = ( );
-    while( my $r = $sth->fetchrow_hashref ) {
-	my $id = $r->{event_id};
-	$r->{hilight} = 0;
+    my $events = Laptimer::Event->load_club( $club, "event_active" );
+    foreach my $event (@$events) {
+	my $id = $event->event_id;
+	$event->hilight( 0 );
 	if($hilight == $id) {
-	    $r->{hilight} = 1;
+	    $event->hilight( 1 );
 	}
-	$r->{url} = "/club/$club/$id";
-	push @r, $r;
     }
 
     my $et_sth = database->prepare(
@@ -133,7 +126,7 @@ get '/club/:club' => sub {
     template 'list_events', {
 	club => $cr,
 	cluburl => "/club/$club",
-	events => \@r,
+	events => $events,
 	error => $error,
 	event_types => \@et,
     };
@@ -427,22 +420,12 @@ get '/results/:club' => sub {
 	);
     $sth->execute( $club );
     my $cr = $sth->fetchrow_hashref;
-    
-    $sth = database->prepare(
-	"select * from event where club_id = ? order by event_id"
-	) or die database->errstr;
-    $sth->execute( $club );
 
-    my @r;
-    while( my $r = $sth->fetchrow_hashref ) {
-	my $id = $r->{event_id};
-	$r->{url} = "/results/$club/$id";
-	push @r, $r;
-    }
-    
+    my $events = Laptimer::Event->load_club( $club );
+
     template 'list_results', {
 	"club" => $cr,
-        "events" => \@r,
+        "events" => $events,
     };
 
 };

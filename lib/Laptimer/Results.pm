@@ -95,9 +95,10 @@ sub finalise {
 	) or die database->errstr;
     
     foreach my $r ( @$results ) {
-	warning( $r->{effort} );
-	warning( $r->{fastest_ms} );
-	warning( $r->{total_ms} );
+	# Do not save results that have been marked fault, they would
+	# have to be corrected first.
+	next if $r->{fault};
+	
 	$ins_rp->execute(
 	    $event,
 	    $r->{place},
