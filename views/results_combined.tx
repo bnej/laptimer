@@ -1,0 +1,47 @@
+: cascade layouts::main
+: around title {
+  <: $type_info.event_type_name :>
+: }
+: around body {
+: include toolbar { title => $type_info.event_type_name }
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <table class="table table-striped table-sm table-responsive-sm results-table">
+	     
+	<thead class="thead-dark">
+	  <tr>
+	    <th scope="col" style="width: 40px;">Place</th>
+	    <th scope="col">Date</th>
+	    <th scope="col">Rider</th>
+	    <th scope="col">Laps</th>
+	    <th scope="col">Effort</th>
+	    <th scope="col">Best Lap</th>
+	    <th scope="col">Total Time</th>
+	    <th scope="col">Av. Speed</th>
+	  </tr>
+	</thead>
+	<tbody>
+	  : for $results -> $item {
+	  <tr <: if $item.fault { :>class="table-warning"<: } :>>
+	    <td><: $item.place :></td>
+	    <td><: $item.date :></td>
+	    <td><a href="<: $item.url :>"><: $item.name :></a></td>
+	    <td><: $item.event_laps :></td>
+	    <td><: $item.effort :></td>
+	    <td><: $item.fastest :></td>
+	    <td><: $item.total :> <span class="result-split"><: $item.split :></span></td>
+	    <td><: $item.speed :><span class="unit">km/h</span></td>
+	  </tr>
+	  : }
+	  : else {
+          <tr><td colspan="5">No event results.</td></tr>
+	  : }
+	</tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+: }

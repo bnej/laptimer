@@ -10,6 +10,7 @@ use Crypt::SaltedHash;
 
 use Laptimer::Results;
 use Laptimer::Event;
+use Laptimer::EventType;
 use Laptimer::Timing;
 
 use Laptimer::Util qw(:all);
@@ -32,6 +33,12 @@ get '/' => sub {
     
     template 'index', {
         "clubs" => \@clubs,
+	    up => [
+		{
+		    link => "/combined",
+		    name => "Combined Results",
+		}
+	    ],
     };
 };
 
@@ -482,6 +489,30 @@ get '/results/:club/:event/:athlete' => sub {
     };
 };
 
+get '/combined/:event_type' => sub {
+    my $event_type = params->{event_type};
 
+    my $cr = Laptimer::EventType->load_type( $event_type );
+    my $results_table = Laptimer::Results->event_type_combined( $event_type );
+    template 'results_combined', {
+	"type_info" => $cr,
+	"baseurl" => "/combined/$event_type",
+	"up" => [
+	    {
+		"link" => "/combined",
+		"name" => "Combined",
+	    },
+	    ],
+	"results" => $results_table,
+    };
+};
+
+get '/combined' => sub {
+    my $cr = Laptimer::EventType->load_all( );
+
+    template 'combined', {
+	"event_types" => $cr
+    };
+};
 
 true;

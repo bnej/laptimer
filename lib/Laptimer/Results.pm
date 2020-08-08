@@ -8,6 +8,9 @@ use Dancer::Plugin::Database;
 use Dancer::Exception qw(:all);
 use Laptimer::Util qw(:all);
 
+use DateTime;
+use DateTime::Format::Pg;
+
 sub event {
     my ($class, $cr) = @_;
 
@@ -18,6 +21,12 @@ sub event {
 	$r = $class->load_table( $cr );
     }
     return $class->add_calculated( $cr, $r);
+}
+
+sub event_type_combined {
+    my ( $class, $event_type, $athlete_id ) = @_;
+    my $r = $class->load_table_combined( $event_type, $athlete_id );
+    return $class->add_calculated( undef, $r );
 }
 
 sub add_calculated {
@@ -31,9 +40,12 @@ sub add_calculated {
 	    ($best->{total_ms} || 0),3,'+');
     }
 
+    my $lap_length = $cr ? $cr->lap_length : 333.3;
     foreach my $res ( @$r ) {
 	my $ms = $res->{total_ms} || 0;
-	my $track_length = $cr->lap_length || 333.3;
+	# The lap length may be on the result record, or we can take it
+	# from the event record, or default to 333.3.
+	my $track_length = $res->{lap_length} || $lap_length;
 	my $laps = $res->{event_laps};
 
 	my $total_length = $track_length * $laps;
@@ -136,6 +148,56 @@ sub flush_event {
     return 1;
 }
 
+sub load_table_combined {
+    my ($class, $event_type, $athlete_id) = @_;
+
+    my $where_athlete = "true";
+    my @bind = ( $event_type );
+    if( $athlete_id ) {
+	$where_athlete = "athlete_id = ?";
+	push @bind, $athlete_id;
+    }
+
+    my @r;
+    my $sth = database->prepare(
+	"select * from event_type join event using (event_type_id)".
+	" join result_place using (event_id)".
+	" join athlete using (athlete_id)".
+	" where event_type_id = ?".
+	" and $where_athlete".
+	" order by event_laps desc, total_time asc"
+	) or die database->errstr;
+    my $place = 1;
+
+    $sth->execute( @bind ) or die $sth->errstr;
+
+    while( my $r = $sth->fetchrow_hashref ) {
+	my $id = $r->{athlete_id};
+	my $club = $r->{club_id};
+	my $event = $r->{event_id};
+
+	my $date_fmt = DateTime::Format::Pg->parse_date( $r->{event_date} )->format_cldr( 'ccc dd MMM yyyy' );
+
+	push @r, {
+	    id => $id,
+	    url => "/results/$club/$event/$id",
+	    place => $place ++,
+	    name => $r->{athlete_name},
+	    total_ms => $r->{total_time},
+	    total => ms_format( $r->{total_time} ),
+	    effort => $r->{effort},
+	    fastest_ms => $r->{best_lap},
+	    fastest => ms_format( $r->{best_lap} ),
+	    event_laps => $r->{event_laps},
+	    finished => ($r->{event_laps} >= $r->{total_laps} ? 1 : 0 ),
+	    lap_length => $r->{lap_length},
+	    date => $date_fmt,
+	};
+    }
+    
+    return \@r;
+}
+
 sub load_table {
     my ($class, $cr) = @_;
     my $club = $cr->{club_id};
@@ -147,7 +209,6 @@ sub load_table {
 	);
     $sth->execute( $event );
     my $i = 0;
-    my $fastest = 0;
     my $total_laps = $cr->{total_laps};
     
     while( my $r = $sth->fetchrow_hashref ) {

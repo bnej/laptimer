@@ -1,0 +1,36 @@
+: cascade layouts::main
+: around title {
+ Combined Results
+: }
+: around body {
+: include toolbar { title => "Combined Results" }
+
+<div class="container-fluid">
+  <div class="row break-above">
+    <div class="col-12">
+    <table class="table" id="event-table">
+      <thead class="thead-light">
+	<tr>
+	  <th scope="col">Event Type</th>
+	  <th scope="col">Laps</th>
+	  <th scope="col">Distance</th>
+	</tr>
+      </thead>
+      <tbody>
+	: for $event_types -> $et {
+	<tr>
+	  <td>
+	    <a href="<: $et.results_url :>"><: $et.event_type_name :></a>
+	  </td>
+	  <td> <: $et.laps :> </td> <td> <: $et.distance :> </td>
+	</tr>
+	: }
+	: else {
+        <li class="list-group-item">No Types.</li>
+	: }
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+: }
