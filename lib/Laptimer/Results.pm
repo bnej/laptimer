@@ -267,21 +267,26 @@ sub load_live {
 		       id => $id, lap => $lap, time => $time,
 		       active => $active };
 	if($started) {
-	    my $event_laps = ++ $athletes{$id}{event_laps};
-	    push @{$athletes{$id}{laps}}, $lap;
-
-	    my $finished = 0;
-	    if( $event_laps >= $cr->{total_laps} ) {
-		$athletes{$id}{finished} = 1;
-		$finished = 1;
+	    # This condition is for non-repeating events - the athlete
+	    # won't get reset so we have to truncate any additional
+	    # laps they may have recorded.
+	    if( ! $finished ) {
+		my $event_laps = ++ $athletes{$id}{event_laps};
+		push @{$athletes{$id}{laps}}, $lap;
+		$finished = 0;
+		if( $event_laps >= $cr->{total_laps} ) {
+		    $athletes{$id}{finished} = 1;
+		    $finished = 1;
+		}
+		$athletes{$id}{total} += $lap;
+		if(defined $athletes{$id}{fastest}) {
+		    $athletes{$id}{fastest} = $lap
+			if $lap < $athletes{$id}{fastest};
+		} else {
+		    $athletes{$id}{fastest} = $lap; # First lap in event
+		}
 	    }
-	    $athletes{$id}{total} += $lap;
-	    if(defined $athletes{$id}{fastest}) {
-		$athletes{$id}{fastest} = $lap if $lap < $athletes{$id}{fastest};
-	    } else {
-		$athletes{$id}{fastest} = $lap; # First lap in event
-	    }
-
+	    
 	    if( $finished ) {
 
 		# For non-repeating events, don't push the result on
