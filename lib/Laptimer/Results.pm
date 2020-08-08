@@ -26,24 +26,37 @@ sub add_calculated {
     my $best = $r->[0];
     $best->{split} = '';
     for( my $i = 1; $i < @$r; $i ++ ) {
-	$r->[$i]{split} = ms_format($r->[$i]{total_ms} - $best->{total_ms},3,'+');
+	$r->[$i]{split} = ms_format(
+	    ($r->[$i]{total_ms} || 0) -
+	    ($best->{total_ms} || 0),3,'+');
     }
 
     foreach my $res ( @$r ) {
-	my $ms = $res->{total_ms};
+	my $ms = $res->{total_ms} || 0;
 	my $track_length = $cr->lap_length || 333.3;
 	my $laps = $res->{event_laps};
 
 	my $total_length = $track_length * $laps;
-	
-	my $km_h = ( $total_length / 1000 ) / ( $ms / (1000 * 60 * 60) );
-	$km_h = sprintf('%0.1f', $km_h);
-	$res->{speed} = $km_h;
+
+	if( $ms > 0 ) {
+	    my $km_h = ( $total_length / 1000 ) / ( $ms / (1000 * 60 * 60) );
+	    $km_h = sprintf('%0.1f', $km_h);
+	    $res->{speed} = $km_h;
+	} else {
+	    $res->{speed} = "0.0";
+	}
+
+	$res->{fault} = 0;
+	if( $res->{speed} > 100 ) {
+	    $res->{fault} = 1;
+	} elsif( ! $ms ) {
+	    # Invalid total time.
+	    $res->{fault} = 1;
+	}
     }
     
     return $r;
-}
-    
+}    
 
 sub laps {
     my ($class, $cr, $athlete) = @_;
@@ -315,19 +328,24 @@ sub load_live {
 	# If they are finished, the result is already in, this is to
 	# add any DNFs or to show race-in-progress.
 	if( $ar->{n} >= $cr->{start_lap} && !$ar->{finished} ) {
-	    warning( "oops" );
 	    push @finished, $ar;
 	}
     }
     
     foreach my $f (@finished) {
 	$f->{name} = $class->athlete($f->{id})->{athlete_name};
+	$f->{total_ms} = $f->{total};
     }
     foreach my $id (keys %athletes) {
 	$athletes{$id}{name} = $class->athlete($id)->{athlete_name};
     }
+
+    $class->add_calculated( $cr, \@finished );
     
-    my @results_table = sort { $b->{event_laps} <=> $a->{event_laps} || $a->{total} <=> $b->{total} } @finished;
+    my @results_table = sort {
+	$a->{fault} <=> $b->{fault}                 # Faults to the bottom
+	|| $b->{event_laps} <=> $a->{event_laps}    # Then most laps first (DNF)
+	|| $a->{total} <=> $b->{total} } @finished; # Then time at that lap
     
     for( my $i = 0; $i < @results_table; $i ++ ) {
 	if( $results_table[$i]{finished} ) {
@@ -335,7 +353,6 @@ sub load_live {
 	} else {
 	    $results_table[$i]{place} = ($i + 1)."*";
 	}
-	warning( $results_table[$i]{fastest} );
 	$results_table[$i]{fastest_ms} = $results_table[$i]{fastest}; # save
 	$results_table[$i]{fastest} = ms_format($results_table[$i]{fastest});
 	

@@ -23,7 +23,7 @@
 	</thead>
 	<tbody>
 	  : for $results -> $item {
-	  <tr>
+	  <tr <: if $item.fault { :>class="table-warning"<: } :>>
 	    <td><: $item.place :></td>
 	    <td><a href="<: $item.url :>"><: $item.name :></a></td>
 	    <td><: $item.event_laps :></td>

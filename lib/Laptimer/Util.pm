@@ -12,7 +12,7 @@ our %EXPORT_TAGS = (
 use POSIX qw(ceil floor);
 
 sub ms_format {
-    my $ms = shift;
+    my $ms = shift || 0;
     my $ms_places = shift || 3;
     my $prefix = shift || "";
     
