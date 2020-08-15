@@ -86,8 +86,13 @@ sub TO_JSON {
 	$r->{$key} = $self->$key;
     }
     $r->{marks} = $self->marks;
-    $r->{last_mark} = $r->{marks}[-1]{timing_number};
-    $r->{last_offset} = $r->{marks}[-1]{mark};
+    if(@{$r->{marks}}) {
+	$r->{last_mark} = $r->{marks}[-1]{timing_number};
+	$r->{last_offset} = $r->{marks}[-1]{mark};
+    } else {
+	$r->{last_mark} = 0;
+	$r->{last_offset} = 0;
+    }
     return $r;
 }
 
