@@ -43,6 +43,22 @@
 	  <a href="<: $event_info.url :>/single_timer">Individual Timer</a>
 	</li>
       </ul>
+
+      <h3>Event</h3>
+      <ul class="list_group">
+	<li class="list-group-item">
+	  <a href="<: $event_info.url :>/finalise">Finalise</a>
+	</li>
+	<li class="list-group-item">
+	  <a href="<: $event_info.url :>/delete">Delete</a>
+	</li>
+	<li class="list-group-item">
+	  <a href="<: $event_info.url :>/inspect">
+	    Inspect detailed timing data
+	  </a>
+	</li>
+      </ul>
+
       
     </div>
   </div>

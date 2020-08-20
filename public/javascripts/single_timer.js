@@ -135,7 +135,6 @@ function mark_lap( ) {
 	"timestamp":current
     };
 
-    console.log("mark " + mark_number + " effort " + effort_mark + " finished " + effort_finished() );
     if( !effort_finished() ) {
 	/* Don't record a mark if we aren't running. */
 	marks[mark_number] = place_mark;
@@ -144,7 +143,6 @@ function mark_lap( ) {
 	mark_number ++;
 	effort_mark ++;
     }
-    console.log("* mark " + mark_number + " effort " + effort_mark + " finished " + effort_finished() );
 
     /* Start the timer if this is the active lap */
     if( effort_mark == start_lap ) {

@@ -1,0 +1,21 @@
+: cascade layouts::main
+: around body {
+: include toolbar { title => 'Delete - ' ~ $event_info.event_name }
+
+<div class="container-fluid">
+  <div class="row break-above">
+    <div class="col-12">
+      <div class="alert alert-info" role="alert">
+	<p>
+	Deleting the event will remove the event and any recorded results.
+	</p>
+      </div>
+      <form method="POST" action="<: $baseurl :>/delete">
+	<button type="submit" class="btn btn-lg btn-block btn-danger">Delete</button>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+:}

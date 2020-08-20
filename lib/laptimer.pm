@@ -406,6 +406,30 @@ post '/club/:club/:event/finalise' => sub {
     redirect "/club/$club";
 };
 
+get '/club/:club/:event/delete' => sub {
+    my $club = params->{club};
+    my $event = params->{event};
+
+    my $cr = Laptimer::Event->load_event( $club, $event );
+
+    template 'delete', {
+	"event_info" => $cr,
+	"baseurl" => "/club/$club/$event",
+	"cluburl" => "/club/$club",
+    };
+};
+
+post '/club/:club/:event/delete' => sub {
+    my $club = params->{club};
+    my $event = params->{event};
+
+    my $cr = Laptimer::Event->load_event( $club, $event );
+    $cr->delete;
+
+    redirect "/club/$club";
+};
+
+
 get '/club/:club/:event' => sub {
     my $club = params->{club};
     my $event = params->{event};

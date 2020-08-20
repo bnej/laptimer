@@ -37,6 +37,17 @@ sub load_event {
     }
 }
 
+sub delete {
+    my $self = shift;
+    
+    my $sth = database->prepare(
+	"delete from event where event_id = ?"
+	) or die database->errstr;
+    $sth->execute( $self->event_id ) or die $sth->errstr;
+    
+    return 1;
+}
+
 sub load_club {
     my $class = shift;
     my $club = shift;
