@@ -3,7 +3,7 @@
   Single: <: $event_info.event_name :>
 : }
 : around js_head {
-<script src="<: $request.uri_base :>/javascripts/single_timer.js"></script>
+<script src="<: $request.uri_base :>/javascripts/single_timer.js?v=2"></script>
 : }
 
 : around body {
