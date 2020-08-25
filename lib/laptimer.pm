@@ -517,11 +517,43 @@ get '/combined/:event_type' => sub {
     my $event_type = params->{event_type};
 
     my $cr = Laptimer::EventType->load_type( $event_type );
+    my $riders = $cr->rider_list;
+    
     my $results_table = Laptimer::Results->event_type_combined( $event_type );
     template 'results_combined', {
 	"type_info" => $cr,
 	"baseurl" => "/combined/$event_type",
 	"up" => [
+	    {
+		"link" => "/combined",
+		"name" => "Combined",
+	    },
+	    ],
+	"riders" => $riders,
+	"results" => $results_table,
+        "title" => $cr->event_type_name,
+    };
+};
+
+get '/combined/:event_type/:athlete' => sub {
+    my $event_type = params->{event_type};
+    my $athlete = params->{athlete};
+
+    my $cr = Laptimer::EventType->load_type( $event_type );
+    my $riders = $cr->rider_list;
+    my ($ar) = grep { $_->{athlete_id} == $athlete } @$riders;
+
+    my $results_table = Laptimer::Results->event_type_combined( $event_type, $athlete );
+    template 'results_combined', {
+	"type_info" => $cr,
+        "baseurl" => "/combined/$event_type",
+        "title" => $cr->event_type_name . ' - ' . $ar->{athlete_name},
+	"riders" => $riders,
+	"up" => [
+	    {
+		"link" => "/combined/$event_type",
+		"name" => $cr->event_type_name,
+	    },
 	    {
 		"link" => "/combined",
 		"name" => "Combined",

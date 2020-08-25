@@ -32,6 +32,21 @@ sub load_type {
     }
 }
 
+sub rider_list {
+    my $self = shift;
+    my $type_id = $self->event_type_id;
+    
+    my $sth = database->prepare("select * from athlete where athlete_id in (select athlete_id from result_place join event using (event_id) where event_type_id = ?) order by athlete_name");
+    $sth->execute( $type_id );
+
+    my @r = ( );
+    while( my $r = $sth->fetchrow_hashref ) {
+	push @r, $r;
+    }
+
+    return \@r;
+}
+
 sub load_all {
     my $class = shift;
     

@@ -1,9 +1,9 @@
 : cascade layouts::main
 : around title {
-  <: $type_info.event_type_name :>
+  <: $title :>
 : }
 : around body {
-: include toolbar { title => $type_info.event_type_name }
+: include toolbar { title => $title }
 
 <div class="container-fluid">
   <div class="row">

@@ -13,11 +13,28 @@
 	
 	<div class="collapse navbar-collapse" id="navbarSupportedContent">
 	  <ul class="navbar-nav ml-auto">
+	    : if $riders {
+	    <div class="btn-group">
+	      <button type="button" class="btn btn-primary dropdown-toggle"
+		      data-toggle="dropdown" aria-haspopup="true"
+		      aria-expanded="false">
+		Pick Rider
+	      </button>
+	      <div class="dropdown-menu">
+		: for $riders -> $r {
+		<a class="dropdown-item" href="<: $baseurl :>/<:$r.athlete_id :>">
+		  : $r.athlete_name
+		</a>
+		: }
+	      </div>
+	    </div>
+	    : }
 	    : for $up -> $ul {
 	    <li class="nav-item active">
 	      <a class="nav-link" href="<: $ul.link :>"><: $ul.name :></a>
 	    </li>
 	    : }
+
 	    <li class="nav-item active">
 	      <a class="nav-link" href="/">Home</a>
 	    </li>
