@@ -515,23 +515,41 @@ get '/results/:club/:event/:athlete' => sub {
 
 get '/combined/:event_type' => sub {
     my $event_type = params->{event_type};
+    my $view = params->{view};
 
     my $cr = Laptimer::EventType->load_type( $event_type );
     my $riders = $cr->rider_list;
-    
-    my $results_table = Laptimer::Results->event_type_combined( $event_type );
+
+    my $results_table;
+    my $title = $cr->event_type_name;
+    my @switch = ( );
+    if( $view && $view eq 'best' ) {
+	$results_table = Laptimer::Results->best_time_combined( $event_type );
+	$title .= " - Best";
+	@switch = {
+	    link => "/combined/$event_type",
+	    name => "All Times",
+	};
+    } else {
+	$results_table = Laptimer::Results->event_type_combined( $event_type );
+	@switch = {
+	    link => "/combined/$event_type?view=best",
+	    name => "Best Times",
+	};
+    }
     template 'results_combined', {
 	"type_info" => $cr,
 	"baseurl" => "/combined/$event_type",
-	"up" => [
-	    {
-		"link" => "/combined",
-		"name" => "Combined",
-	    },
+	    "up" => [
+		@switch,
+		{
+		    "link" => "/combined",
+		    "name" => "Combined",
+		},
 	    ],
 	"riders" => $riders,
 	"results" => $results_table,
-        "title" => $cr->event_type_name,
+        "title" => $title,
     };
 };
 

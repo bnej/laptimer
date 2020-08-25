@@ -20,12 +20,14 @@ sub event {
     } else {
 	$r = $class->load_table( $cr );
     }
-    return $class->add_calculated( $cr, $r);
+    $class->compare_distance( $cr, $r ); # Compare to best
+    return $class->add_calculated( $cr, $r );
 }
 
 sub event_type_combined {
     my ( $class, $event_type, $athlete_id ) = @_;
     my $r = $class->load_table_combined( $event_type, $athlete_id );
+    $class->compare_distance( undef, $r ); # Compare to best
     return $class->add_calculated( undef, $r );
 }
 
@@ -68,7 +70,32 @@ sub add_calculated {
     }
     
     return $r;
-}    
+}
+
+sub compare_distance {
+    my ($class, $cr, $r, $cmp_time) = @_; # Time is the benchmark
+					  # time. We are going to
+					  # estimate +/- distance
+					  # relative to that time.
+    
+    $cmp_time //= $r->[0]{total_ms}; # Default to first time if not supplied
+
+    my $lap_length = $cr ? $cr->lap_length : 333.3;
+    foreach my $res (@$r) {
+	my $ms = $res->{total_ms} || 0;
+	my $track_length = $res->{lap_length} || $lap_length;
+	my $laps = $res->{event_laps};
+
+	my $total_length = $track_length * $laps;
+
+	my $m_ms = $total_length / $ms;
+	my $delta_time = $ms - $cmp_time;
+	my $delta_m = sprintf("%0.1f",$m_ms * $delta_time);
+	$res->{behind_m} = $delta_m;
+    }
+
+    return $r;
+}
 
 sub laps {
     my ($class, $cr, $athlete) = @_;
@@ -196,6 +223,25 @@ sub load_table_combined {
     }
     
     return \@r;
+}
+
+sub best_time_combined {
+    my ($class, $event_type, $athlete_id) = @_;
+    
+    my $table = $class->load_table_combined( $event_type );
+
+    my %seen_athlete = ( );
+    my $place = 1;
+    my @r = ( );
+    foreach my $r ( @$table ) {
+	next if $seen_athlete{$r->{id}}; # Only take the first seen time.
+	$r->{place} = $place ++; # Reset places.
+	push @r, $r;
+	$seen_athlete{$r->{id}} = 1;
+    }
+
+    $class->compare_distance( undef, \@r ); # Compare to best
+    return $class->add_calculated( undef, \@r );
 }
 
 sub load_table {

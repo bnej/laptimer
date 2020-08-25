@@ -19,6 +19,7 @@
 	    <th scope="col">Best Lap</th>
 	    <th scope="col">Total Time</th>
 	    <th scope="col">Av. Speed</th>
+	    <th scope="col">Dist.</th>
 	  </tr>
 	</thead>
 	<tbody>
@@ -31,6 +32,7 @@
 	    <td><: $item.fastest :></td>
 	    <td><: $item.total :> <span class="result-split"><: $item.split :></span></td>
 	    <td><: $item.speed :><span class="unit">km/h</span></td>
+	    <td><: $item.behind_m :><span class="unit">m</span></td>
 	  </tr>
 	  : }
 	  : else {
