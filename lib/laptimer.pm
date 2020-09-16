@@ -170,6 +170,24 @@ post '/club/:club/new_event' => sub {
     }
 };
 
+post '/club/:club/:event/inspect' => sub {
+    my $club = params->{club};
+    my $event = params->{event};
+    
+    my $cr = Laptimer::Event->load_event( $club, $event );
+
+    my $athlete = params->{athlete};
+    my $mark = params->{mark};
+
+    my $sth = database->prepare(
+	"update place_mark set athlete_id = ? where timing_number = ? and event_id = ?"
+	);
+    $sth->execute( $athlete, $mark, $event );
+
+    return redirect "/club/$club/$event/inspect";
+};
+
+
 get '/club/:club/:event/inspect' => sub {
     my $club = params->{club};
     my $event = params->{event};
@@ -179,9 +197,11 @@ get '/club/:club/:event/inspect' => sub {
     my ($results, $marks) = Laptimer::Results->load_live( $cr );
     my $j = 0;
     my %a_id = ( );
+    my @a_col = ( );
     foreach my $m (@$marks) {
 	my $id = $m->{id};
 	if( not defined $a_id{$id} ) {
+	    @a_col[$j] = $id;
 	    $a_id{$id} = $j;
 	    $j++;
 	}
@@ -203,7 +223,15 @@ get '/club/:club/:event/inspect' => sub {
     
     foreach my $m (@$marks) {
 	my $id = $m->{id};
-	my $row = [ ('') x $n_r ];
+	my $row = [ ];
+	for( my $i = 0; $i < $n_r; $i ++ ) {
+	    push @$row, {
+		time => '',
+		athlete => $a_col[$i],
+		mark => $m->{mark},
+		set => 0,
+	    };
+	}
 	my $ix = $a_id{$id};
 
 	if( $m->{active} ) {
@@ -211,9 +239,11 @@ get '/club/:club/:event/inspect' => sub {
 	    $col_counts[$ix] ++;
 	}
 	
-	$row->[$ix] = ms_format( $m->{lap},1 );
-	unshift @$row, ms_format( $m->{time},1 );
-	unshift @$row, $m->{mark};
+	$row->[$ix]{time} = ms_format( $m->{lap},1 );
+	$row->[$ix]{set} = 1;
+	unshift @$row, { time => ms_format( $m->{time},1 ) };
+	unshift @$row, { time => $m->{mark} };
+	
 	push @r, { active => $m->{active}, row => $row };
     }
 
@@ -240,8 +270,8 @@ get '/club/:club/:event/inspect' => sub {
 	my $j = $i;
 	my $delta = 0;
 	while( abs($delta) < abs($var)) {
-	    if( ! $r[$j]{row}[$ix + 2] ) {
-		$r[$j]{row}[$ix + 2] =
+	    if( ! $r[$j]{row}[$ix + 2]{time} ) {
+		$r[$j]{row}[$ix + 2]{time} =
 		    '?'.ms_format( $marks->[$i]{lap} + $delta, 1 );
 	    }
 	    $j += $dir;

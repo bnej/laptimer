@@ -83,6 +83,8 @@ sub compare_distance {
     my $lap_length = $cr ? $cr->lap_length : 333.3;
     foreach my $res (@$r) {
 	my $ms = $res->{total_ms} || 0;
+	next if $ms == 0;
+	
 	my $track_length = $res->{lap_length} || $lap_length;
 	my $laps = $res->{event_laps};
 
@@ -137,7 +139,7 @@ sub finalise {
 	# Do not save results that have been marked fault, they would
 	# have to be corrected first.
 	next if $r->{fault};
-	
+
 	$ins_rp->execute(
 	    $event,
 	    $r->{place},
@@ -456,11 +458,7 @@ sub load_live {
 	|| $a->{total} <=> $b->{total} } @finished; # Then time at that lap
     
     for( my $i = 0; $i < @results_table; $i ++ ) {
-	if( $results_table[$i]{finished} ) {
-	    $results_table[$i]{place} = $i + 1;
-	} else {
-	    $results_table[$i]{place} = ($i + 1)."*";
-	}
+	$results_table[$i]{place} = $i + 1;
 	$results_table[$i]{fastest_ms} = $results_table[$i]{fastest}; # save
 	$results_table[$i]{fastest} = ms_format($results_table[$i]{fastest});
 	

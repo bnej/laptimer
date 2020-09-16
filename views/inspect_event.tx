@@ -31,7 +31,16 @@
 	    >
 	    : for $m.row -> $col {
 	    <td>
-	      <: $col :>
+	      <: $col.time :>
+	      : if !$col.set and $col.athlete {
+	      <form method="POST" action="inspect" style="display:inline">
+	      <input type="hidden" name="athlete" value="<: $col.athlete :>">
+	      <input type="hidden" name="mark" value="<: $col.mark :>">
+	      <button type="submit" class="btn-outline-info btn-sm">
+	        set
+              </button>
+	      </form>
+	      : }
 	    </td>
 	    : }
 	    <td><: $m.var_pc :></td>
